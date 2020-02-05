@@ -1,0 +1,99 @@
+name: CI
+on: 
+  push:
+    branches: 
+    - master
+  pull_request:
+    branches: 
+    - "*"
+
+jobs:
+
+  "tuxOS-Tests":
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        images:
+        - swift:5.1
+        - swiftlang/swift:nightly-5.2
+    container:
+      image: ${{ matrix.images }}
+      volumes:
+      - $GITHUB_WORKSPACE:/src
+      options: --workdir /src
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Test
+      run: swift test --enable-code-coverage --enable-test-discovery
+    - name: Convert coverage files
+      run: llvm-cov export -format="lcov" .build/debug/pure-swift-jsonPackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
+    - name: Upload to codecov.io
+      uses: codecov/codecov-action@v1.0.3
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: info.lcov
+
+  "tuxOS-Performance-Tests":
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        images:
+        - swift:5.1
+        - swiftlang/swift:nightly-5.2
+    container:
+      image: ${{ matrix.images }}
+      volumes:
+      - $GITHUB_WORKSPACE:/src
+      options: --workdir /src
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Build
+      run: swift build -c release
+      working-directory: ./PerfTests
+    - name: Run test
+      run: .build/release/PureSwiftJSONCodingPerfTests
+      working-directory: ./PerfTests
+
+  "macOS-Tests":
+    runs-on: macOS-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Show all Xcode versions
+      run: ls -an /Applications/ | grep Xcode*
+    - name: Change Xcode command line tools
+      run: sudo xcode-select -s /Applications/Xcode_11.3.app/Contents/Developer
+    - name: Swift version
+      run: swift --version
+    # - name: SPM Build
+    #   run: swift build
+    # - name: SPM Tests
+    #   run: swift test --parallel -Xswiftc -DDEBUG
+    - name: Xcode Tests
+      run: |
+        swift package generate-xcodeproj
+        xcodebuild -quiet -parallel-testing-enabled YES -scheme pure-swift-json-Package -enableCodeCoverage YES build test
+    - name: Codecov
+      run: bash <(curl -s https://codecov.io/bash) -t ${{secrets.CODECOV_TOKEN}} -f *.coverage.txt
+
+  "macOS-Performance-Tests":
+    runs-on: macOS-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Build
+      run: swift build -c release
+      working-directory: ./PerfTests
+    - name: Run test
+      run: .build/release/PureSwiftJSONCodingPerfTests
+      working-directory: ./PerfTests
