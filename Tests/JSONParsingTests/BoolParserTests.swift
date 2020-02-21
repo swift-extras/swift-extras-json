@@ -34,6 +34,25 @@ class BoolParserTests: XCTestCase {
     XCTAssertEqual(remaining, [UInt8(ascii: ",")])
   }
   
+
+  func testMiddleCharacterInvalidCase() throws {
+     var parser = JSONParserImpl(bytes: [UInt8]("faLse,".utf8))
+     _ = try XCTUnwrap(parser.reader.read())
+
+    // rfc8259 §3
+    // The literal names MUST be lowercase.  No other literal names are allowed.
+     do {
+       _ = try parser.parseBool()
+       XCTFail("this point should not be reached")
+     }
+     catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L")) {
+       // expected
+     }
+     catch {
+       XCTFail("Unexpected error: \(error)")
+     }
+   }
+  
   func testInvalidCharacter() throws {
     var parser = JSONParserImpl(bytes: [UInt8]("fal67,".utf8))
     _ = try XCTUnwrap(parser.reader.read())

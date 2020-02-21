@@ -61,5 +61,53 @@ class JSONEncoderTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+  
+  func testEncodeDoubleNAN() {
+    
+     do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(Double.nan)
+      XCTFail("this point should not be reached")
+       
+     }
+     catch {
+      // missing expected catch
+       XCTFail("Unexpected error: \(error)")
+     }
+   }
+  
+  func testEncodeDoubleInf() {
+    
+     do {
+      let _ = try PureSwiftJSONCoding.JSONEncoder().encode(Double.infinity)
+      XCTFail("this point should not be reached")
+       
+     }
+     catch {
+      // missing expected catch
+       XCTFail("Unexpected error: \(error)")
+     }
+   }
+  
+  func testEncodeQuote() {
+    do {
+     let result = try PureSwiftJSONCoding.JSONEncoder().encode("\"")
+     
+     XCTAssertEqual(result, "\\\"")
+    }
+    catch {
+       XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testEncodeQuote() {
+    do {
+     let result = try PureSwiftJSONCoding.JSONEncoder().encode("\"")
+     
+     XCTAssertEqual(result, "\\\"")
+    }
+    catch {
+       XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 

@@ -46,5 +46,30 @@ class JSONDecoderTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+  
+
+  func testDecodeOptional() throws {
+    struct OptStruct: Codable {
+       let nulled: String?
+       let nonexistent: String?
+     }
+    
+    do {
+      let string = """
+        {
+          "nulled": null
+        }
+        """
+      
+      let result = try JSONDecoder().decode(OptStruct.self, from: [UInt8](string.utf8))
+      
+      XCTAssertEqual(result.nulled, nil)
+      XCTAssertEqual(result.nonexistent, nil)
+      
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
