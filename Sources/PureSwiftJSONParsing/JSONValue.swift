@@ -130,3 +130,117 @@ public func == (lhs: JSONValue, rhs: JSONValue) -> Bool {
     return false
   }
 }
+
+@available(*, deprecated, message: "Don't use this, this is slow")
+class WritableBuffer {
+  private var ptr: UnsafeMutableRawBufferPointer
+  
+  @usableFromInline typealias _Index    = UInt32
+  @usableFromInline typealias _Capacity = UInt32
+  
+  @usableFromInline var _index   : _Index    = 0
+  @usableFromInline var _capacity: _Capacity = 6144
+  
+  init() {
+    self.ptr = UnsafeMutableRawBufferPointer.allocate(byteCount: Int(_capacity), alignment: 0)
+  }
+  
+  @inline(__always) func write(_ ptr: UnsafeRawBufferPointer) {
+    let bytesCount = ptr.count
+    let target = UnsafeMutableRawBufferPointer(rebasing: self.ptr.dropFirst(Int(_index)))
+    target.copyBytes(from: ptr)
+    self._index += _Index(bytesCount)
+  }
+  
+  @inline(__always) func write(byte: UInt8) {
+    self.ptr[Int(self._index)] = byte
+    self._index += 1
+  }
+  
+  @inline(__always) func toBytes() -> [UInt8] {
+    return [UInt8](ptr)
+  }
+}
+
+extension WritableBuffer {
+  
+  func write(json: JSONValue) {
+    
+    switch json {
+    case .null:
+      self.write(byte: UInt8(ascii: "n"))
+      self.write(byte: UInt8(ascii: "u"))
+      self.write(byte: UInt8(ascii: "l"))
+      self.write(byte: UInt8(ascii: "l"))
+      
+    case .bool(true):
+      self.write(byte: UInt8(ascii: "t"))
+      self.write(byte: UInt8(ascii: "r"))
+      self.write(byte: UInt8(ascii: "u"))
+      self.write(byte: UInt8(ascii: "e"))
+      
+    case .bool(false):
+      self.write(byte: UInt8(ascii: "f"))
+      self.write(byte: UInt8(ascii: "a"))
+      self.write(byte: UInt8(ascii: "l"))
+      self.write(byte: UInt8(ascii: "s"))
+      self.write(byte: UInt8(ascii: "e"))
+      
+    case .string(let string):
+      self.write(byte: UInt8(ascii: "\""))
+      string.utf8.withContiguousStorageIfAvailable {
+        self.write(UnsafeRawBufferPointer($0))
+      }
+      self.write(byte: UInt8(ascii: "\""))
+    case .number(let string):
+      string.utf8.withContiguousStorageIfAvailable {
+        self.write(UnsafeRawBufferPointer($0))
+      }
+    case .array(let array):
+      var iterator = array.makeIterator()
+      self.write(byte: UInt8(ascii: "["))
+      // we don't like branching, this is why we have this extra
+      if let first = iterator.next() {
+        self.write(json: first)
+      }
+      while let item = iterator.next() {
+        self.write(byte: UInt8(ascii: ","))
+        self.write(json: item)
+      }
+      self.write(byte: UInt8(ascii: "]"))
+    case .object(let dict):
+      var iterator = dict.makeIterator()
+      self.write(byte: UInt8(ascii: "{"))
+      if let (key, value) = iterator.next() {
+        self.write(byte: UInt8(ascii: "\""))
+        key.utf8.withContiguousStorageIfAvailable {
+          self.write(UnsafeRawBufferPointer($0))
+        }
+        self.write(byte: UInt8(ascii: "\""))
+        self.write(byte: UInt8(ascii: ":"))
+        self.write(json: value)
+      }
+      while let (key, value) = iterator.next() {
+        self.write(byte: UInt8(ascii: ","))
+        self.write(byte: UInt8(ascii: "\""))
+        key.utf8.withContiguousStorageIfAvailable {
+          self.write(UnsafeRawBufferPointer($0))
+        }
+        self.write(byte: UInt8(ascii: "\""))
+        self.write(byte: UInt8(ascii: ":"))
+        self.write(json: value)
+      }
+      self.write(byte: UInt8(ascii: "}"))
+    }
+  }
+}
+
+extension JSONValue {
+
+  @available(*, deprecated, message: "Don't use this, this is slow")
+  public func toBytes() -> [UInt8] {
+    let buffer = WritableBuffer()
+    buffer.write(json: self)
+    return buffer.toBytes()
+  }
+}
