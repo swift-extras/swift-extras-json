@@ -12,11 +12,19 @@ class StringParserTests: XCTestCase {
   }
   
   func testEscapedQuotesString() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("\"\\\"\"".utf8))
+    let bytes = [
+      UInt8(ascii: "\""),
+      UInt8(ascii: "\\"),
+      UInt8(ascii: "\\"),
+      UInt8(ascii: "\\"),
+      UInt8(ascii: "\""),
+      UInt8(ascii: "\""),
+    ]
+    var parser = JSONParserImpl(bytes: bytes)
     _ = try XCTUnwrap(parser.reader.read())
     
     let result = try parser.parseString()    
-    XCTAssertEqual(result, "\\\"")
+    XCTAssertEqual([UInt8](result.utf8), [UInt8(ascii: "\\"), UInt8(ascii: "\"")])
   }
   
   
