@@ -56,4 +56,21 @@ class ArrayParserTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+  
+  func testHighlyNestedArray() throws {
+    // test 512 should succeed
+    let passingString = String(repeating: "[", count: 512) +  String(repeating: "]", count: 512)
+    _  = try JSONParser().parse(bytes: [UInt8](passingString.utf8))
+    
+    let failingString = String(repeating: "[", count: 513)
+    do {
+      _  = try JSONParser().parse(bytes: [UInt8](failingString.utf8))
+    }
+    catch JSONError.tooManyNestedArraysOrDictionaries(characterIndex: 512) {
+      //expected case
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }

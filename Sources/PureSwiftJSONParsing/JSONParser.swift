@@ -18,6 +18,7 @@ public struct JSONParser {
 @usableFromInline struct JSONParserImpl {
   
   @usableFromInline var reader: DocumentReader
+  @usableFromInline var depth : Int = 0
   
   @inlinable init<Bytes: Collection>(bytes: Bytes) where Bytes.Element == UInt8 {
     self.reader = DocumentReader(bytes: bytes)
@@ -25,6 +26,13 @@ public struct JSONParser {
   
   @usableFromInline mutating func parse() throws -> JSONValue {
     let value = try parseValue()
+    #if DEBUG
+    defer {
+      guard self.depth == 0 else {
+        preconditionFailure()
+      }
+    }
+    #endif
     
     // handle extra character if top level was number
     if case .number(_) = value {
@@ -236,12 +244,18 @@ public struct JSONParser {
   }
   
   mutating func parseArray() throws -> [JSONValue] {
-    // parse first value or immidiate end
-    precondition(reader.value == UInt8(ascii: "["))
+    assert(reader.value == UInt8(ascii: "["))
+    guard depth < 512 else {
+      throw JSONError.tooManyNestedArraysOrDictionaries(characterIndex: reader.index)
+    }
+    depth += 1
+    defer { depth -= 1 }
     var state = ArrayState.expectValueOrEnd
     
     var array = [JSONValue]()
     array.reserveCapacity(10)
+    
+    // parse first value or immidiate end
     
     do {
       let value = try parseValue()
@@ -336,6 +350,13 @@ public struct JSONParser {
   }
   
   mutating func parseObject() throws -> [String: JSONValue] {
+    assert(reader.value == UInt8(ascii: "{"))
+    guard depth < 512 else {
+      throw JSONError.tooManyNestedArraysOrDictionaries(characterIndex: reader.index)
+    }
+    depth += 1
+    defer { depth -= 1 }
+    
     var state = ObjectState.expectKeyOrEnd
     
     // parse first key or end immidiatly
