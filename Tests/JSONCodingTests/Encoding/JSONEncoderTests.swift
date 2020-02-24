@@ -55,7 +55,7 @@ class JSONEncoderTests: XCTestCase {
     do {
       let result = try PureSwiftJSONCoding.JSONEncoder().encode("Hello World")
       
-      XCTAssertEqual(String(bytes: result, encoding: .utf8), "\"Hello World\"")
+      XCTAssertEqual(String(bytes: result, encoding: .utf8), #""Hello World""#)
     }
     catch {
       XCTFail("Unexpected error: \(error)")

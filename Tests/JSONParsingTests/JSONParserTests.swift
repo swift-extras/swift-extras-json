@@ -59,7 +59,7 @@ class JSONParserTests: XCTestCase {
   
   func testMoreComplexObject() throws {
     do {
-      let result = try JSONParser().parse(bytes: [UInt8]("{\"hello\":[12,12,true,null,[\"abc\"]]}".utf8))
+      let result = try JSONParser().parse(bytes: [UInt8](#"{"hello":[12,12,true,null,["abc"]]}"#.utf8))
       XCTAssertEqual(result, .object(["hello": .array([.number("12"), .number("12"), .bool(true), .null, .array([.string("abc")])])]))
     }
     catch {

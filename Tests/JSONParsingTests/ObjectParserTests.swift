@@ -12,7 +12,7 @@ class ObjectParserTests: XCTestCase {
   }
   
   func testSimpleKeyValueArray() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("{ \"hello\" : \"world\" }".utf8))
+    var parser = JSONParserImpl(bytes: [UInt8](#"{ "hello" : "world" }"#.utf8))
     let _ = try XCTUnwrap(parser.reader.read())
     
     let result = try parser.parseObject()
@@ -20,13 +20,11 @@ class ObjectParserTests: XCTestCase {
   }
   
   func testTwoKeyValueArray() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("{ \"hello\" : \"world\", \"haha\" \n\t: true }".utf8))
+    let jsonString = #"{ "hello" : "world", "haha" \#n\#t: true }"#
+    var parser = JSONParserImpl(bytes: [UInt8](jsonString.utf8))
     let _ = try XCTUnwrap(parser.reader.read())
     
     let result = try parser.parseObject()
     XCTAssertEqual(result, ["hello": .string("world"), "haha": .bool(true)])
   }
-
-  
-
 }

@@ -20,7 +20,7 @@ class ArrayParserTests: XCTestCase {
   }
   
   func testSimpleTrueAndStringArray() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("[   true  , \"hello\" ]".utf8))
+    var parser = JSONParserImpl(bytes: [UInt8](#"[   true  , "hello" ]"#.utf8))
     let _ = try XCTUnwrap(parser.reader.read())
     
     let result = try parser.parseArray()
