@@ -27,4 +27,21 @@ class ObjectParserTests: XCTestCase {
     let result = try parser.parseObject()
     XCTAssertEqual(result, ["hello": .string("world"), "haha": .bool(true)])
   }
+  
+  func testHighlyNestedObject() throws {
+    // test 512 should succeed
+    let passingString = String(repeating: #"{"a":"#, count: 512) + "null" + String(repeating: "}", count: 512)
+    _  = try JSONParser().parse(bytes: [UInt8](passingString.utf8))
+    
+    let failingString = String(repeating: #"{"a":"#, count: 513)
+    do {
+      _  = try JSONParser().parse(bytes: [UInt8](failingString.utf8))
+    }
+    catch JSONError.tooManyNestedArraysOrDictionaries(characterIndex: 2560) {
+      //expected case
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }

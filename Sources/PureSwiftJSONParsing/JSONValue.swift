@@ -2,6 +2,7 @@
 public enum JSONError: Swift.Error {
   case unexpectedCharacter(ascii: UInt8)
   case unexpectedEndOfFile
+  case tooManyNestedArraysOrDictionaries(characterIndex: Int)
 }
 
 public enum JSONValue {
