@@ -3,6 +3,11 @@ public enum JSONError: Swift.Error {
   case unexpectedCharacter(ascii: UInt8)
   case unexpectedEndOfFile
   case tooManyNestedArraysOrDictionaries(characterIndex: Int)
+  case invalidHexDigitSequence(String, index: Int)
+  case unexpectedEscapedCharacter(ascii: UInt8, in: String, index: Int)
+  case unescapedControlCharacterInString(ascii: UInt8, in: String, index: Int)
+  case expectedLowSurrogateUTF8SequenceAfterHighSurrogate(in: String, index: Int)
+  case couldNotCreateUnicodeScalarFromUInt32(in: String, index: Int, unicodeScalarValue: UInt32)
 }
 
 public enum JSONValue {

@@ -25,4 +25,16 @@ class NullParserTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+  
+  func testNullMissingEnd() throws {
+    do {
+      _ = try JSONParser().parse(bytes: [UInt8]("nul".utf8))
+    }
+    catch JSONError.unexpectedEndOfFile {
+      // expected
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
