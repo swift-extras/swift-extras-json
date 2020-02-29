@@ -19,6 +19,42 @@ class BoolParserTests: XCTestCase {
     XCTAssertEqual(result, false)
   }
   
+  func testTrueMissingEnd() throws {
+    do {
+      _ = try JSONParser().parse(bytes: [UInt8]("tr".utf8))
+    }
+    catch JSONError.unexpectedEndOfFile {
+      // expected
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testFalseMissingEnd() throws {
+    do {
+      _ = try JSONParser().parse(bytes: [UInt8]("fal".utf8))
+    }
+    catch JSONError.unexpectedEndOfFile {
+      // expected
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testTrueMiddleCharacterInvalidCase() throws {
+    do {
+      _ = try JSONParser().parse(bytes: [UInt8]("trUe".utf8))
+    }
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "U")) {
+      // expected
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
   func testFalseOtherCharactersFollowing() throws {
     var parser = JSONParserImpl(bytes: [UInt8]("false,".utf8))
     _ = try XCTUnwrap(parser.reader.read())
@@ -34,23 +70,23 @@ class BoolParserTests: XCTestCase {
     XCTAssertEqual(remaining, [UInt8(ascii: ",")])
   }
   
-  func testMiddleCharacterInvalidCase() throws {
-     var parser = JSONParserImpl(bytes: [UInt8]("faLse,".utf8))
-     _ = try XCTUnwrap(parser.reader.read())
+  func testFalseMiddleCharacterInvalidCase() throws {
+    var parser = JSONParserImpl(bytes: [UInt8]("faLse,".utf8))
+    _ = try XCTUnwrap(parser.reader.read())
 
     // rfc8259 §3
     // The literal names MUST be lowercase.  No other literal names are allowed.
-     do {
-       _ = try parser.parseBool()
-       XCTFail("this point should not be reached")
-     }
-     catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L")) {
-       // expected
-     }
-     catch {
-       XCTFail("Unexpected error: \(error)")
-     }
-   }
+    do {
+      _ = try parser.parseBool()
+      XCTFail("this point should not be reached")
+    }
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L")) {
+      // expected
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
   
   func testInvalidCharacter() throws {
     var parser = JSONParserImpl(bytes: [UInt8]("fal67,".utf8))
