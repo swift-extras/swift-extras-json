@@ -1,6 +1,6 @@
 
 public enum JSONError: Swift.Error {
-  case unexpectedCharacter(ascii: UInt8)
+  case unexpectedCharacter(ascii: UInt8, characterIndex: Int)
   case unexpectedEndOfFile
   case tooManyNestedArraysOrDictionaries(characterIndex: Int)
   case invalidHexDigitSequence(String, index: Int)
@@ -104,6 +104,23 @@ extension JSONValue {
         value.appendBytes(to: &bytes)
       }
       bytes.append(UInt8(ascii: "}"))
+    }
+  }
+  
+  public var debugDataTypeDescription: String {
+    switch self {
+    case .array(_):
+      return "an array"
+    case .bool(_):
+      return "bool"
+    case .number(_):
+      return "a number"
+    case .string(_):
+      return "a string"
+    case .object(_):
+      return "a dictionary"
+    case .null:
+      return "null"
     }
   }
 }

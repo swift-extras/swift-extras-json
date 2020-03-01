@@ -17,21 +17,19 @@ struct JSONSingleValueDecodingContainter: SingleValueDecodingContainer {
   }
   
   func decode(_ type: Bool.Type) throws -> Bool {
-    switch value {
-    case .bool(let bool):
-      return bool
-    default:
-      throw JSONDecoder.Error.invalidType
+    guard case .bool(let bool) = value else {
+      throw createTypeMismatchError(type: Bool.self, value: value)
     }
+    
+    return bool
   }
   
   func decode(_ type: String.Type) throws -> String {
-    switch value {
-    case .string(let string):
-      return string
-    default:
-      throw JSONDecoder.Error.invalidType
+    guard case .string(let string) = value else {
+      throw createTypeMismatchError(type: String.self, value: value)
     }
+    
+    return string
   }
   
   func decode(_ type: Double.Type) throws -> Double {
@@ -89,31 +87,41 @@ struct JSONSingleValueDecodingContainter: SingleValueDecodingContainer {
 
 extension JSONSingleValueDecodingContainter {
   
+  @inline(__always) private func createTypeMismatchError(type: Any.Type, value: JSONValue) -> DecodingError {
+    return DecodingError.typeMismatch(type, .init(
+      codingPath: codingPath,
+      debugDescription: "Expected to decode \(type) but found \(value.debugDataTypeDescription) instead."))
+  }
+  
   @inline(__always) private func decodeFixedWithInteger<T: FixedWidthInteger>() throws
     -> T
   {
-    switch value {
-    case .number(let string):
-      guard let number = T(string) else {
-        throw JSONDecoder.Error.invalidType
-      }
-      return number
-    default:
-      throw JSONDecoder.Error.invalidType
+    guard case .number(let number) = value else {
+      throw createTypeMismatchError(type: T.self, value: value)
     }
+    
+    guard let integer = T(number) else {
+      throw DecodingError.dataCorruptedError(
+        in: self,
+        debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
+    }
+    
+    return integer
   }
   
   @inline(__always) private func decodeLosslessStringConvertible<T: LosslessStringConvertible>()
     throws -> T
   {
-    switch value {
-    case .number(let string):
-      guard let number = T(string) else {
-        throw JSONDecoder.Error.invalidType
-      }
-      return number
-    default:
-      throw JSONDecoder.Error.invalidType
+    guard case .number(let number) = value else {
+      throw createTypeMismatchError(type: T.self, value: value)
     }
+    
+    guard let floatingPoint = T(number) else {
+      throw DecodingError.dataCorruptedError(
+        in: self,
+        debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
+    }
+    
+    return floatingPoint
   }
 }

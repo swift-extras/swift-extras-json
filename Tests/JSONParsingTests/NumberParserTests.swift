@@ -135,7 +135,7 @@ class NumberParserTests: XCTestCase {
       let result = try JSONParser().parse(bytes: [UInt8]("-.".utf8))
       XCTFail("Did not expect to have a result: \(result)")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: ".")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "."), characterIndex: 1) {
       // expected
     }
     catch {
@@ -148,7 +148,7 @@ class NumberParserTests: XCTestCase {
       let result = try JSONParser().parse(bytes: [UInt8]("1 000".utf8))
       XCTFail("Did not expect to have a result: \(result)")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "0")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "0"), characterIndex: 2) {
       // expected
     }
     catch {

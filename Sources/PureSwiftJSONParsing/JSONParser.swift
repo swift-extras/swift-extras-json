@@ -44,16 +44,16 @@ public struct JSONParser {
       case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
         break
       default:
-        throw JSONError.unexpectedCharacter(ascii: extraCharacter)
+        throw JSONError.unexpectedCharacter(ascii: extraCharacter, characterIndex: reader.index)
       }
     }
     
-    while let (byte, _) = reader.read() {
+    while let (byte, index) = reader.read() {
       switch byte {
       case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
         continue
       default:
-        throw JSONError.unexpectedCharacter(ascii: byte)
+        throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
       }
     }
     
@@ -63,7 +63,7 @@ public struct JSONParser {
   // MARK: Generic Value Parsing
   
   mutating func parseValue() throws -> JSONValue {
-    while let (byte, _) = reader.read() {
+    while let (byte, index) = reader.read() {
       switch byte {
       case UInt8(ascii: "\""):
         return .string(try parseString())
@@ -86,7 +86,7 @@ public struct JSONParser {
       case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
         continue
       default:
-        throw JSONError.unexpectedCharacter(ascii: byte)
+        throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
       }
     }
 
@@ -105,7 +105,7 @@ public struct JSONParser {
         throw JSONError.unexpectedEndOfFile
       }
       
-      throw JSONError.unexpectedCharacter(ascii: value)
+      throw JSONError.unexpectedCharacter(ascii: value, characterIndex: reader.index)
     }
   }
 
@@ -123,7 +123,7 @@ public struct JSONParser {
           throw JSONError.unexpectedEndOfFile
         }
         
-        throw JSONError.unexpectedCharacter(ascii: value)
+        throw JSONError.unexpectedCharacter(ascii: value, characterIndex: reader.index)
       }
 
       return true
@@ -138,7 +138,7 @@ public struct JSONParser {
           throw JSONError.unexpectedEndOfFile
         }
         
-        throw JSONError.unexpectedCharacter(ascii: value)
+        throw JSONError.unexpectedCharacter(ascii: value, characterIndex: reader.index)
       }
 
       return false
@@ -205,7 +205,7 @@ public struct JSONParser {
         numbersSinceControlChar += 1
       case UInt8(ascii: "."):
         guard numbersSinceControlChar > 0, pastControlChar == .operand else {
-          throw JSONError.unexpectedCharacter(ascii: byte)
+          throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
         }
         
         hasLeadingZero = false
@@ -218,7 +218,7 @@ public struct JSONParser {
               (pastControlChar == .operand || pastControlChar == .decimalPoint)
           else
         {
-          throw JSONError.unexpectedCharacter(ascii: byte)
+          throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
         }
         
         hasLeadingZero = false
@@ -227,25 +227,25 @@ public struct JSONParser {
         numbersSinceControlChar = 0
       case UInt8(ascii: "+"), UInt8(ascii: "-"):
         guard numbersSinceControlChar == 0, pastControlChar == .exp else {
-          throw JSONError.unexpectedCharacter(ascii: byte)
+          throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
         }
         
         pastControlChar = .expOperator
         numbersSinceControlChar = 0
       case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
         guard numbersSinceControlChar > 0 else {
-          throw JSONError.unexpectedCharacter(ascii: byte)
+          throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
         }
         
         return reader.makeStringFast(reader[stringStartIndex..<index])
       case UInt8(ascii: ","), UInt8(ascii: "]"), UInt8(ascii: "}"):
         guard numbersSinceControlChar > 0 else {
-          throw JSONError.unexpectedCharacter(ascii: byte)
+          throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
         }
         
         return reader.makeStringFast(reader[stringStartIndex..<index])
       default:
-        throw JSONError.unexpectedCharacter(ascii: byte)
+        throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
       }
     }
     
@@ -295,15 +295,14 @@ public struct JSONParser {
         case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
           state = .expectSeperatorOrEnd
         default:
-          throw JSONError.unexpectedCharacter(ascii: extraByte)
+          throw JSONError.unexpectedCharacter(ascii: extraByte, characterIndex: reader.index)
         }
       }
       else {
         state = .expectSeperatorOrEnd
       }
-      
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "]")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "]"), _) {
       return []
     }
     
@@ -314,7 +313,7 @@ public struct JSONParser {
       case .expectSeperatorOrEnd:
         // parsing for seperator or end
         
-        seperatorloop: while let (byte, _) = reader.read() {
+        seperatorloop: while let (byte, index) = reader.read() {
           switch byte {
           case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
             continue
@@ -324,7 +323,7 @@ public struct JSONParser {
             state = .expectValue
             break seperatorloop
           default:
-            throw JSONError.unexpectedCharacter(ascii: byte)
+            throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
           }
         }
         
@@ -352,7 +351,7 @@ public struct JSONParser {
         case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
           state = .expectSeperatorOrEnd
         default:
-          throw JSONError.unexpectedCharacter(ascii: extraByte)
+          throw JSONError.unexpectedCharacter(ascii: extraByte, characterIndex: reader.index)
         }
       case .expectValueOrEnd:
         preconditionFailure("this state should not be reachable at this point")
@@ -381,7 +380,7 @@ public struct JSONParser {
     var state = ObjectState.expectKeyOrEnd
     
     // parse first key or end immidiatly
-    loop: while let (byte, _) = reader.read() {
+    loop: while let (byte, index) = reader.read() {
       switch byte {
       case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
         continue
@@ -391,7 +390,7 @@ public struct JSONParser {
       case UInt8(ascii: "}"):
         return [:]
       default:
-        throw JSONError.unexpectedCharacter(ascii: byte)
+        throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
       }
     }
     
@@ -405,7 +404,7 @@ public struct JSONParser {
     while true {
       switch state {
       case .expectKey:
-        keyloop: while let (byte, _) = reader.read() {
+        keyloop: while let (byte, index) = reader.read() {
           switch byte {
           case UInt8(ascii: "\""):
             let key = try self.parseString()
@@ -414,7 +413,7 @@ public struct JSONParser {
           case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
             continue
           default:
-            throw JSONError.unexpectedCharacter(ascii: byte)
+            throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
           }
         }
         
@@ -424,7 +423,7 @@ public struct JSONParser {
         
         
       case .expectColon(let key):
-        colonloop: while let (byte, _) = reader.read() {
+        colonloop: while let (byte, index) = reader.read() {
           switch byte {
           case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
             continue
@@ -432,7 +431,7 @@ public struct JSONParser {
             state = .expectValue(key: key)
             break colonloop
           default:
-            throw JSONError.unexpectedCharacter(ascii: byte)
+            throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
           }
         }
         
@@ -463,12 +462,12 @@ public struct JSONParser {
         case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
           state = .expectSeperatorOrEnd
         default:
-          throw JSONError.unexpectedCharacter(ascii: extraByte)
+          throw JSONError.unexpectedCharacter(ascii: extraByte, characterIndex: reader.index)
         }
         
         
       case .expectSeperatorOrEnd:
-        seperatorloop: while let (byte, _) = reader.read() {
+        seperatorloop: while let (byte, index) = reader.read() {
           switch byte {
           case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
             continue
@@ -478,7 +477,7 @@ public struct JSONParser {
             state = .expectKey
             break seperatorloop
           default:
-            throw JSONError.unexpectedCharacter(ascii: byte)
+            throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
           }
         }
         

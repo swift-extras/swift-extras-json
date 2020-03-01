@@ -29,6 +29,9 @@ var package = Package(
     .testTarget(
       name: "JSONParsingTests",
       dependencies: ["PureSwiftJSONParsing"]),
+    .testTarget(
+      name: "LearningTests",
+      dependencies: ["PureSwiftJSONParsing"]),
   ]
 )
 

@@ -5,20 +5,12 @@ struct JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol 
   
   let impl      : JSONDecoderImpl
   let codingPath: [CodingKey]
-  let value     : JSONValue
   let dictionary: [String: JSONValue]
   
-  init(impl: JSONDecoderImpl, codingPath: [CodingKey], json: JSONValue) {
+  init(impl: JSONDecoderImpl, codingPath: [CodingKey], dictionary: [String: JSONValue]) {
     self.impl       = impl
     self.codingPath = codingPath
-    self.value      = json
-    
-    switch json {
-    case .object(let dictionary):
-      self.dictionary = dictionary
-    default:
-      preconditionFailure()
-    }
+    self.dictionary = dictionary
   }
   
   var allKeys: [K] {
@@ -33,30 +25,28 @@ struct JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol 
   }
   
   func decodeNil(forKey key: K) throws -> Bool {
-    switch self.dictionary[key.stringValue] {
-    case .null:
-      return true
-    default:
-      throw JSONDecoder.Error.invalidType
-    }
+    let value = try getValue(forKey: key)
+    return value == .null
   }
   
   func decode(_ type: Bool.Type, forKey key: K) throws -> Bool {
-    switch self.dictionary[key.stringValue] {
-    case .bool(let bool):
-      return bool
-    default:
-      throw JSONDecoder.Error.invalidType
+    let value = try getValue(forKey: key)
+    
+    guard case .bool(let bool) = value else {
+      throw createTypeMismatchError(type: type, forKey: key, value: value)
     }
+    
+    return bool
   }
   
   func decode(_ type: String.Type, forKey key: K) throws -> String {
-    switch self.dictionary[key.stringValue] {
-    case .string(let string):
-      return string
-    default:
-      throw JSONDecoder.Error.invalidType
+    let value = try getValue(forKey: key)
+    
+    guard case .string(let string) = value else {
+      throw createTypeMismatchError(type: type, forKey: key, value: value)
     }
+    
+    return string
   }
   
   func decode(_ type: Double.Type, forKey key: K) throws -> Double {
@@ -133,31 +123,57 @@ struct JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol 
 
 extension JSONKeyedDecodingContainer {
   
+  @inline(__always) private func getValue(forKey key: K) throws -> JSONValue {
+    guard let value = self.dictionary[key.stringValue] else {
+      throw DecodingError.keyNotFound(key, .init(
+        codingPath: self.codingPath,
+        debugDescription: "No value associated with key \(key) (\"\(key.stringValue)\")."))
+    }
+    
+    return value
+  }
+  
+  @inline(__always) private func createTypeMismatchError(type: Any.Type, forKey key: K, value: JSONValue) -> DecodingError {
+    let codingPath = self.codingPath + [key]
+    return DecodingError.typeMismatch(type, .init(
+      codingPath: codingPath, debugDescription: "Expected to decode \(type) but found \(value.debugDataTypeDescription) instead."))
+  }
+  
   @inline(__always) private func decodeFixedWidthInteger<T: FixedWidthInteger>(key: Self.Key)
     throws -> T
   {
-    switch self.dictionary[key.stringValue] {
-    case .number(let string):
-      guard let number = T(string) else {
-        throw JSONDecoder.Error.invalidType
-      }
-      return number
-    default:
-      throw JSONDecoder.Error.invalidType
+    let value = try getValue(forKey: key)
+    
+    guard case .number(let number) = value else {
+      throw createTypeMismatchError(type: T.self, forKey: key, value: value)
     }
+    
+    guard let integer = T(number) else {
+      throw DecodingError.dataCorruptedError(
+        forKey: key,
+        in: self,
+        debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
+    }
+    
+    return integer
   }
   
   @inline(__always) private func decodeLosslessStringConvertible<T: LosslessStringConvertible>(
     key: Self.Key) throws -> T
   {
-    switch self.dictionary[key.stringValue] {
-    case .number(let string):
-      guard let number = T(string) else {
-        throw JSONDecoder.Error.invalidType
-      }
-      return number
-    default:
-      throw JSONDecoder.Error.invalidType
+    let value = try getValue(forKey: key)
+    
+    guard case .number(let number) = value else {
+      throw createTypeMismatchError(type: T.self, forKey: key, value: value)
     }
+    
+    guard let floatingPoint = T(number) else {
+      throw DecodingError.dataCorruptedError(
+        forKey: key,
+        in: self,
+        debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
+    }
+    
+    return floatingPoint
   }
 }
