@@ -51,6 +51,17 @@ class JSONEncoderTests: XCTestCase {
     }
   }
   
+  func testEncodeTopLevelNull() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(nil as String?)
+      
+      XCTAssertEqual(String(bytes: result, encoding: .utf8), "null")
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
   func testEncodeTopLevelString() {
     do {
       let result = try PureSwiftJSONCoding.JSONEncoder().encode("Hello World")
@@ -61,5 +72,17 @@ class JSONEncoderTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+  
+  func testEncodeQuote() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode("\"")
+      let json = String(bytes: result, encoding: String.Encoding.utf8)
+      XCTAssertEqual(json, "\"\\\"\"")
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
 }
 

@@ -4,27 +4,18 @@ import XCTest
 class StringParserTests: XCTestCase {
   
   func testSimpleHelloString() throws {
-    var parser = JSONParserImpl(bytes: [UInt8](#""Hello""#.utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseString()
-    XCTAssertEqual(result, "Hello")
+    let result = try JSONParser().parse(bytes: [UInt8](#""Hello""#.utf8))
+    XCTAssertEqual(result, .string("Hello"))
   }
 
   func testEscapedQuotesString() throws {
-    var parser = JSONParserImpl(bytes: [UInt8](#""\\\"""#.utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-
-    let result = try parser.parseString()
-    XCTAssertEqual(result, #"\""#)
+    let result = try JSONParser().parse(bytes: [UInt8](#""\\\"""#.utf8))
+    XCTAssertEqual(result, .string(#"\""#))
   }
   
   func testSimpleEscapedUnicode() throws {
-    var parser = JSONParserImpl(bytes: [UInt8](#""\u005A""#.utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseString()
-    XCTAssertEqual(result, "Z")
+    let result = try JSONParser().parse(bytes: [UInt8](#""\u005A""#.utf8))
+    XCTAssertEqual(result, .string("Z"))
   }
   
   func test12CharacterSequenceUnicode() throws {
@@ -177,6 +168,7 @@ class StringParserTests: XCTestCase {
     // quotation marks, except for the characters that MUST be escaped:
     // quotation mark, reverse solidus, and the control characters (U+0000
     // through U+001F).
+    // https://tools.ietf.org/html/rfc7159#section-7
     
     for index in 0...31 {
       var scalars = "\"".unicodeScalars

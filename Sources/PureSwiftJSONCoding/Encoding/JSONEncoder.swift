@@ -40,9 +40,9 @@ public class JSONEncoder {
     
     try value.encode(to: encoder)
     
-    guard let value = encoder.value else {
-      preconditionFailure()
-    }
+    // if the top level encoder does not have a value
+    // we don't have a value at all and we should return `null`
+    let value = encoder.value ?? .null
     
     var bytes = [UInt8]()
     value.appendBytes(to: &bytes)

@@ -110,12 +110,11 @@ public struct DocumentReader {
   // https://bugs.swift.org/browse/SR-12125 has landed.
   // Thanks @weissi for making my code fast!
   @inlinable func makeStringFast<Bytes: Collection>(_ bytes: Bytes) -> String where Bytes.Element == UInt8 {
-      if let string = bytes.withContiguousStorageIfAvailable({
-          return String(decoding: $0, as: Unicode.UTF8.self)
-      }) {
-          return string
-      } else {
-          return String(decoding: bytes, as: Unicode.UTF8.self)
+      if let string = bytes.withContiguousStorageIfAvailable({ String(decoding: $0, as: Unicode.UTF8.self)}) {
+        return string
+      }
+      else {
+        return String(decoding: bytes, as: Unicode.UTF8.self)
       }
   }
   
@@ -142,9 +141,6 @@ public struct DocumentReader {
   }
 
   @inlinable mutating func parseUnicodeSequence() throws -> (Unicode.Scalar, Int) {
-    // the unicode escape sequence has begun two chars before. \ + u
-    // important only for creating good error strings.
-    let startIndex = self.index - 2
     
     // we build this for utf8 only for now.
     let bitPattern = try self.parseUnicodeHexSequence()

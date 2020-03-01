@@ -42,7 +42,34 @@ extension JSONValue {
       ])
     case .string(let string):
       bytes.append(UInt8(ascii: "\""))
-      bytes.append(contentsOf: string.utf8)
+      let stringBytes    = string.utf8
+      var startCopyIndex = stringBytes.startIndex
+      var nextIndex      = startCopyIndex
+      
+      while nextIndex != stringBytes.endIndex {
+        switch stringBytes[nextIndex] {
+        case 0..<32, UInt8(ascii: "\""), UInt8(ascii: "\\"):
+          // All Unicode characters may be placed within the
+          // quotation marks, except for the characters that MUST be escaped:
+          // quotation mark, reverse solidus, and the control characters (U+0000
+          // through U+001F).
+          // https://tools.ietf.org/html/rfc7159#section-7
+          
+          // copy the current range over
+          bytes.append(contentsOf: stringBytes[startCopyIndex..<nextIndex])
+          bytes.append(UInt8(ascii: "\\"))
+          bytes.append(stringBytes[nextIndex])
+          
+          nextIndex      = stringBytes.index(after: nextIndex)
+          startCopyIndex = nextIndex
+        default:
+          nextIndex      = stringBytes.index(after: nextIndex)
+        }
+      }
+      
+      // copy everything, that hasn't been copied yet
+      bytes.append(contentsOf: stringBytes[startCopyIndex..<nextIndex])
+      
       bytes.append(UInt8(ascii: "\""))
     case .number(let string):
       bytes.append(contentsOf: string.utf8)
