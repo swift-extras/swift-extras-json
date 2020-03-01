@@ -8,6 +8,7 @@ public enum JSONError: Swift.Error {
   case unescapedControlCharacterInString(ascii: UInt8, in: String, index: Int)
   case expectedLowSurrogateUTF8SequenceAfterHighSurrogate(in: String, index: Int)
   case couldNotCreateUnicodeScalarFromUInt32(in: String, index: Int, unicodeScalarValue: UInt32)
+  case numberWithLeadingZero(index: Int)
 }
 
 public enum JSONValue {
