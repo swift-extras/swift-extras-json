@@ -129,7 +129,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
       }
     }
     
-    let newKey = ArrayKey(index: currentIndex)
+    let newKey  = ArrayKey(index: currentIndex)
     let decoder = try impl.decoderForKey(newKey)
     
     return try T.init(from: decoder)

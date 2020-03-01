@@ -2,7 +2,7 @@
 struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 
   let impl      : JSONEncoderImpl
-  let array     : ArrayClass
+  let array     : JSONArray
   let codingPath: [CodingKey]
   
   private(set) var count: Int = 0

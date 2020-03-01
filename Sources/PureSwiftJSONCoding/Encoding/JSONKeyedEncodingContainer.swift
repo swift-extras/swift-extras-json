@@ -3,7 +3,7 @@ struct JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
   typealias Key = K
   
   let impl      : JSONEncoderImpl
-  let object    : ObjectClass
+  let object    : JSONObject
   let codingPath: [CodingKey]
   
   private var firstValueWritten: Bool = false

@@ -1,6 +1,6 @@
 import PureSwiftJSONParsing
 
-class ArrayClass {
+class JSONArray {
   
   private(set) var array: [JSONValue] = []
   
@@ -13,7 +13,7 @@ class ArrayClass {
   }
 }
 
-class ObjectClass {
+class JSONObject {
   
   private(set) var dict: [String: JSONValue] = [:]
   
@@ -57,8 +57,8 @@ class JSONEncoderImpl {
   let codingPath : [CodingKey]
   
   var singleValue: JSONValue?
-  var array      : ArrayClass?
-  var object     : ObjectClass?
+  var array      : JSONArray?
+  var object     : JSONObject?
   
   var value: JSONValue? {
     if let object = self.object {
@@ -89,7 +89,7 @@ extension JSONEncoderImpl: Encoder {
       preconditionFailure()
     }
     
-    self.object = ObjectClass()
+    self.object = JSONObject()
     let container = JSONKeyedEncodingContainer<Key>(impl: self, codingPath: codingPath)
     return KeyedEncodingContainer(container)
   }
@@ -103,7 +103,7 @@ extension JSONEncoderImpl: Encoder {
       preconditionFailure()
     }
     
-    self.array = ArrayClass()
+    self.array = JSONArray()
     return JSONUnkeyedEncodingContainer(impl: self, codingPath: codingPath)
   }
   
