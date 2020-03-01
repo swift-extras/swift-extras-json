@@ -165,17 +165,22 @@ public struct JSONParser {
   mutating func parseNumber() throws -> String {
     var pastControlChar        : ControlCharacter = .operand
     var numbersSinceControlChar: UInt             = 0
+    var hasLeadingZero = false
     
     // parse first character
     
     let stringStartIndex = reader.index
     switch reader.value! {
-    case UInt8(ascii: "0")...UInt8(ascii: "9"):
+    case UInt8(ascii: "0"):
+      numbersSinceControlChar = 1
+      pastControlChar         = .operand
+      hasLeadingZero          = true
+    case UInt8(ascii: "1")...UInt8(ascii: "9"):
       numbersSinceControlChar = 1
       pastControlChar = .operand
     case UInt8(ascii: "-"):
       numbersSinceControlChar = 0
-      pastControlChar = .operand
+      pastControlChar         = .operand
     default:
       preconditionFailure("This state should never be reached")
     }
@@ -184,12 +189,26 @@ public struct JSONParser {
     
     while let (byte, index) = reader.read() {
       switch byte {
-      case UInt8(ascii: "0")...UInt8(ascii: "9"):
+      case UInt8(ascii: "0"):
+        if hasLeadingZero {
+          throw JSONError.numberWithLeadingZero(index: index)
+        }
+        if numbersSinceControlChar == 0 && pastControlChar == .operand {
+          // the number started with a minus. this is the leading zero.
+          hasLeadingZero = true
+        }
+        numbersSinceControlChar += 1
+      case UInt8(ascii: "1")...UInt8(ascii: "9"):
+        if hasLeadingZero {
+          throw JSONError.numberWithLeadingZero(index: index)
+        }
         numbersSinceControlChar += 1
       case UInt8(ascii: "."):
         guard numbersSinceControlChar > 0, pastControlChar == .operand else {
           throw JSONError.unexpectedCharacter(ascii: byte)
         }
+        
+        hasLeadingZero = false
         
         pastControlChar = .decimalPoint
         numbersSinceControlChar = 0
@@ -201,6 +220,8 @@ public struct JSONParser {
         {
           throw JSONError.unexpectedCharacter(ascii: byte)
         }
+        
+        hasLeadingZero = false
         
         pastControlChar = .exp
         numbersSinceControlChar = 0
