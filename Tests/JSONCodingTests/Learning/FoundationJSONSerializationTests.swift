@@ -1,9 +1,7 @@
 import Foundation
 import XCTest
 
-
-
-class FoundationJSONSerialization: XCTestCase {
+class FoundationJSONSerializationTests: XCTestCase {
   
   #if canImport(Darwin)
   func testUnescapedNewLine() throws {

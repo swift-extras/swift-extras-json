@@ -56,8 +56,8 @@ public struct JSONDecoder {
     switch self.json {
     case .array(let array):
       guard let key = key as? ArrayKey else {
-        #warning("we need good error handling here")
-        preconditionFailure()
+        preconditionFailure(
+          "For arrays we use the ArrayKey type as the key within this package.")
       }
       let json = array[key.intValue!]
       var newPath = self.codingPath
