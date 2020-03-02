@@ -59,7 +59,7 @@ class ArrayParserTests: XCTestCase {
       _ = try parser.parseArray()
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "]")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "]"), characterIndex: 12) {
       // expected
     }
     catch {
@@ -74,7 +74,7 @@ class ArrayParserTests: XCTestCase {
       _ = try parser.parseArray()
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "a")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "a"), characterIndex: 7) {
       // expected
     }
     catch {
@@ -89,7 +89,7 @@ class ArrayParserTests: XCTestCase {
       _ = try parser.parseArray()
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "]")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "]"), characterIndex: 9) {
       // expected
     }
     catch {
@@ -102,7 +102,7 @@ class ArrayParserTests: XCTestCase {
       _ = try JSONParser().parse(bytes: [UInt8]("[ nu ]".utf8))
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: " ")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: " "), characterIndex: 4) {
       // expected
     }
     catch {

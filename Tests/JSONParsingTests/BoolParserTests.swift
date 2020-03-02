@@ -47,7 +47,7 @@ class BoolParserTests: XCTestCase {
     do {
       _ = try JSONParser().parse(bytes: [UInt8]("trUe".utf8))
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "U")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "U"), characterIndex: 2) {
       // expected
     }
     catch {
@@ -80,7 +80,7 @@ class BoolParserTests: XCTestCase {
       _ = try parser.parseBool()
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L"), characterIndex: 2) {
       // expected
     }
     catch {
@@ -97,7 +97,7 @@ class BoolParserTests: XCTestCase {
       _ = try parser.parseBool()
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "6")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "6"), characterIndex: 3) {
       // expected
     }
     catch {

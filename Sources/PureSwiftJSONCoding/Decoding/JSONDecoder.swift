@@ -2,11 +2,6 @@ import PureSwiftJSONParsing
 
 public struct JSONDecoder {
   
-  public enum Error: Swift.Error {
-    case invalidType
-    
-  }
-  
   private(set) var customEncoder: [String : CustomEncoder] = [:]
   
   @usableFromInline var userInfo: [CodingUserInfoKey : Any] = [:]
@@ -18,10 +13,14 @@ public struct JSONDecoder {
   @inlinable public func decode<T: Decodable, Bytes: Collection>(_ type: T.Type, from bytes: Bytes)
     throws -> T where Bytes.Element == UInt8
   {
-    let json = try JSONParser().parse(bytes: bytes)
-    let decoder = JSONDecoderImpl(userInfo: userInfo, from: json, codingPath: [])
-    
-    return try decoder.decode(T.self)
+    do {
+      let json = try JSONParser().parse(bytes: bytes)
+      let decoder = JSONDecoderImpl(userInfo: userInfo, from: json, codingPath: [])
+      return try decoder.decode(T.self)
+    }
+    catch let error as JSONError {
+      throw error.decodingError
+    }
   }
   
   public typealias CustomEncoder = (Encoder, [CodingKey]) throws -> ()
@@ -90,18 +89,30 @@ extension JSONDecoderImpl: Decoder {
   @usableFromInline func container<Key>(keyedBy type: Key.Type) throws ->
     KeyedDecodingContainer<Key> where Key : CodingKey
   {
+    guard case .object(let dictionary) = self.json else {
+      throw DecodingError.typeMismatch([String: JSONValue].self, DecodingError.Context(
+        codingPath: self.codingPath,
+        debugDescription: "Expected to decode \([String: JSONValue].self) but found \(self.json.debugDataTypeDescription) instead."))
+    }
+    
     let container = JSONKeyedDecodingContainer<Key>(
       impl      : self,
       codingPath: self.codingPath,
-      json      : json)
+      dictionary: dictionary)
     return KeyedDecodingContainer(container)
   }
   
   @usableFromInline func unkeyedContainer() throws -> UnkeyedDecodingContainer {
+    guard case .array(let array) = self.json else {
+      throw DecodingError.typeMismatch([JSONValue].self, DecodingError.Context(
+        codingPath: self.codingPath,
+        debugDescription: "Expected to decode \([JSONValue].self) but found \(self.json.debugDataTypeDescription) instead."))
+    }
+    
     return JSONUnkeyedDecodingContainer(
       impl      : self,
       codingPath: codingPath,
-      json      : json)
+      array     : array)
   }
   
   @usableFromInline func singleValueContainer() throws -> SingleValueDecodingContainer {

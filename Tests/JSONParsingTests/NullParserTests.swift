@@ -18,7 +18,7 @@ class NullParserTests: XCTestCase {
       try parser.parseNull()
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L"), characterIndex: 2) {
       // expected
     }
     catch {

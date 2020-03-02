@@ -36,7 +36,7 @@ class JSONParserTests: XCTestCase {
       _ = try JSONParser().parse(bytes: [UInt8]("true  x".utf8))
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "x")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "x"), characterIndex: 6) {
       // expected
     }
     catch {
@@ -49,7 +49,7 @@ class JSONParserTests: XCTestCase {
       _ = try JSONParser().parse(bytes: [UInt8]("12.678}".utf8))
       XCTFail("this point should not be reached")
     }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "}")) {
+    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "}"), characterIndex: 6) {
       // expected
     }
     catch {

@@ -1,5 +1,5 @@
 
-struct ArrayKey: CodingKey {
+struct ArrayKey: CodingKey, Equatable {
   
   init(index: Int) {
     self.intValue = index
@@ -19,3 +19,10 @@ struct ArrayKey: CodingKey {
     return "Index \(intValue!)"
   }
 }
+
+func == (lhs: ArrayKey, rhs: ArrayKey) -> Bool {
+  precondition(lhs.intValue != nil)
+  precondition(rhs.intValue != nil)
+  return lhs.intValue == rhs.intValue
+}
+
