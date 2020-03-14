@@ -41,36 +41,7 @@ extension JSONValue {
         UInt8(ascii: "f"), UInt8(ascii: "a"), UInt8(ascii: "l"), UInt8(ascii: "s"), UInt8(ascii: "e")
       ])
     case .string(let string):
-      bytes.append(UInt8(ascii: "\""))
-      let stringBytes    = string.utf8
-      var startCopyIndex = stringBytes.startIndex
-      var nextIndex      = startCopyIndex
-      
-      while nextIndex != stringBytes.endIndex {
-        switch stringBytes[nextIndex] {
-        case 0..<32, UInt8(ascii: "\""), UInt8(ascii: "\\"):
-          // All Unicode characters may be placed within the
-          // quotation marks, except for the characters that MUST be escaped:
-          // quotation mark, reverse solidus, and the control characters (U+0000
-          // through U+001F).
-          // https://tools.ietf.org/html/rfc7159#section-7
-          
-          // copy the current range over
-          bytes.append(contentsOf: stringBytes[startCopyIndex..<nextIndex])
-          bytes.append(UInt8(ascii: "\\"))
-          bytes.append(stringBytes[nextIndex])
-          
-          nextIndex      = stringBytes.index(after: nextIndex)
-          startCopyIndex = nextIndex
-        default:
-          nextIndex      = stringBytes.index(after: nextIndex)
-        }
-      }
-      
-      // copy everything, that hasn't been copied yet
-      bytes.append(contentsOf: stringBytes[startCopyIndex..<nextIndex])
-      
-      bytes.append(UInt8(ascii: "\""))
+      encodeString(string, to: &bytes)
     case .number(let string):
       bytes.append(contentsOf: string.utf8)
     case .array(let array):
@@ -89,22 +60,50 @@ extension JSONValue {
       var iterator = dict.makeIterator()
       bytes.append(UInt8(ascii: "{"))
       if let (key, value) = iterator.next() {
-        bytes.append(UInt8(ascii: "\""))
-        bytes.append(contentsOf: key.utf8)
-        bytes.append(UInt8(ascii: "\""))
+        encodeString(key, to: &bytes)
         bytes.append(UInt8(ascii: ":"))
         value.appendBytes(to: &bytes)
       }
       while let (key, value) = iterator.next() {
         bytes.append(UInt8(ascii: ","))
-        bytes.append(UInt8(ascii: "\""))
-        bytes.append(contentsOf: key.utf8)
-        bytes.append(UInt8(ascii: "\""))
+        encodeString(key, to: &bytes)
         bytes.append(UInt8(ascii: ":"))
         value.appendBytes(to: &bytes)
       }
       bytes.append(UInt8(ascii: "}"))
     }
+  }
+  
+  private func encodeString(_ string: String, to bytes: inout [UInt8]) {
+    bytes.append(UInt8(ascii: "\""))
+    let stringBytes    = string.utf8
+    var startCopyIndex = stringBytes.startIndex
+    var nextIndex      = startCopyIndex
+    
+    while nextIndex != stringBytes.endIndex {
+      switch stringBytes[nextIndex] {
+      case 0..<32, UInt8(ascii: "\""), UInt8(ascii: "\\"):
+        // All Unicode characters may be placed within the
+        // quotation marks, except for the characters that MUST be escaped:
+        // quotation mark, reverse solidus, and the control characters (U+0000
+        // through U+001F).
+        // https://tools.ietf.org/html/rfc7159#section-7
+        
+        // copy the current range over
+        bytes.append(contentsOf: stringBytes[startCopyIndex..<nextIndex])
+        bytes.append(UInt8(ascii: "\\"))
+        bytes.append(stringBytes[nextIndex])
+        
+        nextIndex      = stringBytes.index(after: nextIndex)
+        startCopyIndex = nextIndex
+      default:
+        nextIndex      = stringBytes.index(after: nextIndex)
+      }
+    }
+    
+    // copy everything, that hasn't been copied yet
+    bytes.append(contentsOf: stringBytes[startCopyIndex..<nextIndex])
+    bytes.append(UInt8(ascii: "\""))
   }
   
   public var debugDataTypeDescription: String {
