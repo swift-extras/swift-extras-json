@@ -2,8 +2,6 @@ import PureSwiftJSONParsing
 
 public struct JSONDecoder {
   
-  private(set) var customEncoder: [String : CustomEncoder] = [:]
-  
   @usableFromInline var userInfo: [CodingUserInfoKey : Any] = [:]
   
   public init() {
@@ -23,14 +21,6 @@ public struct JSONDecoder {
     }
   }
   
-  public typealias CustomEncoder = (Encoder, [CodingKey]) throws -> ()
-  public mutating func registerCustomEncoder(for type: Encodable.Type, encoder: @escaping CustomEncoder) {
-    self.customEncoder[String(describing: type)] = encoder
-  }
-  
-  public mutating func removeCustomEncoder(for type: Encodable.Type) {
-    self.customEncoder[String(describing: type)] = nil
-  }
 }
 
 @usableFromInline struct JSONDecoderImpl {
