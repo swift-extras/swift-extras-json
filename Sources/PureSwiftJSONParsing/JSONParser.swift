@@ -29,7 +29,7 @@ public struct JSONParser {
     #if DEBUG
     defer {
       guard self.depth == 0 else {
-        preconditionFailure()
+        preconditionFailure("Expected to end parsing with a depth of 0")
       }
     }
     #endif
