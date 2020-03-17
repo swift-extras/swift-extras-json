@@ -73,6 +73,68 @@ class JSONEncoderTests: XCTestCase {
     }
   }
   
+  func testEncodeDoubleNAN() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(Double.nan)
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Double, let context) {
+      XCTAssert(value.isNaN) // expected
+      XCTAssertEqual(context.codingPath.count, 0)
+      XCTAssertEqual(context.debugDescription, "Unable to encode Double.nan directly in JSON.")
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testEncodeDoubleInf() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(Double.infinity)
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Double, let context) {
+      XCTAssert(value.isInfinite) // expected
+      XCTAssertEqual(context.codingPath.count, 0)
+      XCTAssertEqual(context.debugDescription, "Unable to encode Double.inf directly in JSON.")
+    }
+    catch {
+      // missing expected catch
+       XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testEncodeFloatNAN() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(Float.nan)
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Float, let context) {
+      XCTAssert(value.isNaN) // expected
+      XCTAssertEqual(context.codingPath.count, 0)
+      XCTAssertEqual(context.debugDescription, "Unable to encode Float.nan directly in JSON.")
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testEncodeFloatInf() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(Float.infinity)
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Float, let context) {
+      XCTAssert(value.isInfinite) // expected
+      XCTAssertEqual(context.codingPath.count, 0)
+      XCTAssertEqual(context.debugDescription, "Unable to encode Float.inf directly in JSON.")
+    }
+    catch {
+      // missing expected catch
+       XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
   func testEncodeQuote() {
     do {
       let result = try PureSwiftJSONCoding.JSONEncoder().encode("\"")

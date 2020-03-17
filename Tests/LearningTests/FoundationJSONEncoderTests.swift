@@ -54,13 +54,56 @@ class FoundationJSONEncoderTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
-
+  
   func testEncodeTopLevelDoubleInfinity() throws {
     do {
       _ = try JSONEncoder().encode(Double.infinity)
     }
-    catch Swift.EncodingError.invalidValue(let value as Double, _) {
+    catch Swift.EncodingError.invalidValue(let value as Double, let context) {
+      print(context)
       XCTAssert(value.isInfinite) // expected
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  struct DoubleBox: Encodable {
+    let number: Double
+  }
+
+  func testEncodeKeyedContainterDoubleInfinity() throws {
+    do {
+      _ = try JSONEncoder().encode(DoubleBox(number: Double.infinity))
+    }
+    catch Swift.EncodingError.invalidValue(let value as Double, let context) {
+      print(context)
+      XCTAssert(value.isInfinite) // expected
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  struct DoubleInArrayBox: Encodable {
+    let number: Double
+    
+    func encode(to encoder: Encoder) throws {
+      var container = encoder.unkeyedContainer()
+      try container.encode(number)
+    }
+  }
+  
+  func testEncodeDoubleInUnkeyedContainerNAN() {
+    do {
+      let result = try JSONEncoder().encode(DoubleInArrayBox(number: .nan))
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Double, let context) {
+      XCTAssert(value.isNaN) // expected
+      XCTAssertEqual(context.codingPath.count, 1)
+      XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
+      print(context)
     }
     catch {
       XCTFail("Unexpected error: \(error)")
