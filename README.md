@@ -35,7 +35,7 @@ Add `pure-swift-json` as dependency to your `Package.swift`:
 
 ```swift
   dependencies: [
-    .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMajore(from: "0.1.0")),
+    .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMajor(from: "0.1.0")),
   ],
 ```
 
@@ -125,7 +125,7 @@ struct MyEvent: Decodable {
     guard let timestamp = MyEvent.dateFormatter.date(from: dateString) else {
       let dateFormat = String(describing: MyEvent.dateFormatter.dateFormat)
       throw DecodingError.dataCorruptedError(forKey: .eventTime, in: container, debugDescription:
-        "Expected date to be in format `\(dateFormat)`, but `\(dateFormat) does not forfill format`")
+        "Expected date to be in format `\(dateFormat)`, but `\(dateString) does not forfill format`")
     }
     self.eventTime = timestamp
   }
@@ -142,6 +142,48 @@ struct MyEvent: Decodable {
 ```
 
 You can find more information about [encoding and decoding custom types in Apple's documentation](https://developer.apple.com/documentation/foundation/archives_and_serialization/encoding_and_decoding_custom_types).
+
+Of course you can use `@propertyWrapper`s to make this more elegant:
+
+```swift
+import Foundation
+
+@propertyWrapper
+struct DateStringCoding: Decodable {
+  var wrappedValue: Date
+  
+  init(wrappedValue: Date) {
+    self.wrappedValue = wrappedValue
+  }
+
+  init(from decoder: Decoder) throws {
+    let container = try decoder.singleValueContainer()
+    let dateString = try container.decode(String.self)
+    guard let date = Self.dateFormatter.date(from: dateString) else {
+      let dateFormat = String(describing: Self.dateFormatter.dateFormat)
+      throw DecodingError.dataCorruptedError(in: container, debugDescription:
+            "Expected date to be in format `\(dateFormat)`, but `\(dateString) does not forfill format`")
+    }
+    self.wrappedValue = date
+  }
+
+  private static let dateFormatter: DateFormatter = Self.createDateFormatter()
+  private static func createDateFormatter() -> DateFormatter {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+    formatter.timeZone   = TimeZone(secondsFromGMT: 0)
+    formatter.locale     = Locale(identifier: "en_US_POSIX")
+    return formatter
+  }
+}
+
+struct MyEvent: Decodable {
+  @DateStringCoding
+  var eventTime: Date
+}
+```
+
+Checkout the a full example in the test file [DateCodingTests](https://github.com/fabianfett/pure-swift-json/blob/master/Tests/JSONCodingTests/DateCodingTests.swift).
 
 ### UTF-16 and UTF-32
 
@@ -173,3 +215,4 @@ Focus areas for the time being:
 - [@weissi](https://github.com/weissi) thanks for answering all my questions and for opening tickets [SR-12125](https://bugs.swift.org/browse/SR-12125) and [SR-12126](https://bugs.swift.org/browse/SR-12126)
 - [@dinhhungle](https://github.com/dinhhungle) thanks for your quality assurance. It helped a lot! 
 - [@Ro-M](https://github.com/Ro-M) thanks for checking my README.md
+- [@Trzyipolkostkicukru](https://github.com/Trzyipolkostkicukru) thanks for your advice on `@propertyWrappers` and for finding typos.
