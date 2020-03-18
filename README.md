@@ -5,28 +5,28 @@
 [![codecov](https://codecov.io/gh/fabianfett/pure-swift-json/branch/master/graph/badge.svg)](https://codecov.io/gh/fabianfett/pure-swift-json)
 
 This package provides a json encoder and decoder in pure Swift (without the use of Foundation or any other dependency). 
-The implementation is [RFC8259](https://tools.ietf.org/html/rfc8259) complient. It offers a significant performance improvement over the Foundation implementation on Linux.
+The implementation is [RFC8259](https://tools.ietf.org/html/rfc8259) compliant. It offers a significant performance improvement compared to the Foundation implementation on Linux.
 
-If you like the idea of using pure Swift without any dependencies you might also like my reimplementation of Base64 in pure Swift: [`swift-base64-kit`](https://github.com/fabianfett/swift-base64-kit)
+If you like the idea of using pure Swift without any dependencies, you might also like my reimplementation of Base64 in pure Swift: [`swift-base64-kit`](https://github.com/fabianfett/swift-base64-kit)
 
-‼️ **NOTE:** This is in a very early stage of development. Please take into account that the API might change while in prerelease.
+‼️ **NOTE:** This is at a very early stage of development. Please take into account that the API might change while in pre-release.
 
 ## Goals
 
-- [x] Does not use Foundation at all
-- [x] Does not use `unsafe` Swift syntax
-- [x] No external dependencies other than the Swift STL
-- [x] Faster than Foundation implementation
+- [x] does not use Foundation at all
+- [x] does not use `unsafe` Swift syntax
+- [x] no external dependencies other than the Swift STL
+- [x] faster than Foundation implementation
 
 #### Currently not supported
 
 - custom encoder and decoder for [ `Data` and `Date`](#what-about-date-and-data)
 - parsing/decoding of [UTF-16 and UTF-32 encoded json](#utf-16-and-utf-32)
-- transform CodingKeys to camelCase or snake_case (I want to look into this)
+- transforming `CodingKey`s to camelCase or snake_case (I want to look into this)
 
 #### Alternatives
 
-- [IkigaJSON](https://github.com/autimatisering/IkigaJSON) Super fast encoding and decoding especially for server side Swift code. Depends on `SwiftNIO`.
+- [IkigaJSON](https://github.com/autimatisering/IkigaJSON) super fast encoding and decoding especially for server side Swift code. Depends on `SwiftNIO`.
 - [Foundation Coding](https://github.com/apple/swift-corelibs-foundation/blob/master/Sources/Foundation/JSONEncoder.swift)
 
 ## Usage
@@ -95,7 +95,7 @@ $ .build/release/PureSwiftJSONCodingPerfTests
 
 ### What about `Date` and `Data`?
 
-Date and Data are special cases for encoding and decoding. They do have default implementations that are kind off special:
+Date and Data are particular cases for encoding and decoding. They do have default implementations that are kind off special:
 
 - Date will be encoded as a float
 
@@ -105,8 +105,8 @@ Date and Data are special cases for encoding and decoding. They do have default 
 
     Example: `0, 1, 2, 3, 255` will be encoded as: `[0, 1, 2, 3, 255]`
     
-Yes that is the default implementation. Only Apple knows why it is not [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) and [Base64](https://en.wikipedia.org/wiki/Base64). 🙃
-Because I don't want to link against Foundation it is not possible to implement default encoding and decoding strategies for `Date` and `Data` as the Foundation implementation does. That's why, if you want to use another encoding/decoding strategy than the default you need to overwrite `encode(to: Encoder)` and `init(from: Decoder)`.
+Yes, that is the default implementation. Only Apple knows why it is not [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) and [Base64](https://en.wikipedia.org/wiki/Base64). 🙃
+Since I don't want to link against Foundation, it is not possible to implement default encoding and decoding strategies for `Date` and `Data` like the Foundation implementation does. That's why, if you want to use another encoding/decoding strategy than the default, you need to overwrite `encode(to: Encoder)` and `init(from: Decoder)`.
 
 This could look like this:
 
@@ -161,7 +161,7 @@ let utf8  = Array(String(decoding: utf32, as: Unicode.UTF32.self).utf8)
 
 Please feel welcome and encouraged to contribute to `pure-swift-json`. This is a very young endeavour and help is always welcome.
 
-If you've found a bug, have a suggestion or need help getting started, please open an Issue or a PR. If you use this package, I'd be grateful for sharing your experience.
+If you've found a bug, have a suggestion, or need help getting started, please open an Issue or a PR. If you use this package, I'd be grateful for sharing your experience.
 
 Focus areas for the time being:
 
