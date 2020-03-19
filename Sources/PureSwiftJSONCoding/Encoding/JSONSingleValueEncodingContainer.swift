@@ -16,6 +16,7 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
   }
 
   mutating func encode(_ value: Bool) throws {
+    preconditionCanEncodeNewValue()
     self.impl.singleValue = .bool(value)
   }
 
@@ -68,23 +69,31 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
   }
   
   mutating func encode(_ value: String) throws {
+    preconditionCanEncodeNewValue()
     self.impl.singleValue = .string(value)
   }
 
   mutating func encode<T: Encodable>(_ value: T) throws {
-    
+    preconditionCanEncodeNewValue()
+    try value.encode(to: self.impl)
+  }
+  
+  func preconditionCanEncodeNewValue() {
+    precondition(self.impl.singleValue == nil, "Attempt to encode value through single value container when previously value already encoded.")
   }
 }
 
 extension JSONSingleValueEncodingContainer {
   
   @inline(__always) private mutating func encodeFixedWidthInteger<N: FixedWidthInteger>(_ value: N) throws {
+    preconditionCanEncodeNewValue()
     self.impl.singleValue = .number(value.description)
   }
   
   @inline(__always) private mutating func encodeFloatingPoint<N: FloatingPoint>(_ value: N)
     throws where N: CustomStringConvertible
   {
+    preconditionCanEncodeNewValue()
     self.impl.singleValue = .number(value.description)
   }
 
