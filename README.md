@@ -125,7 +125,7 @@ struct MyEvent: Decodable {
     guard let timestamp = MyEvent.dateFormatter.date(from: dateString) else {
       let dateFormat = String(describing: MyEvent.dateFormatter.dateFormat)
       throw DecodingError.dataCorruptedError(forKey: .eventTime, in: container, debugDescription:
-        "Expected date to be in format `\(dateFormat)`, but `\(dateString) does not forfill format`")
+        "Expected date to be in format `\(dateFormat)`, but `\(dateString) does not fulfill format`")
     }
     self.eventTime = timestamp
   }
@@ -162,7 +162,7 @@ struct DateStringCoding: Decodable {
     guard let date = Self.dateFormatter.date(from: dateString) else {
       let dateFormat = String(describing: Self.dateFormatter.dateFormat)
       throw DecodingError.dataCorruptedError(in: container, debugDescription:
-            "Expected date to be in format `\(dateFormat)`, but `\(dateString) does not forfill format`")
+            "Expected date to be in format `\(dateFormat)`, but `\(dateString) does not fulfill format`")
     }
     self.wrappedValue = date
   }
@@ -183,7 +183,7 @@ struct MyEvent: Decodable {
 }
 ```
 
-Checkout the a full example in the test file [DateCodingTests](https://github.com/fabianfett/pure-swift-json/blob/master/Tests/JSONCodingTests/DateCodingTests.swift).
+Checkout a full example in the test file [DateCodingTests](https://github.com/fabianfett/pure-swift-json/blob/master/Tests/JSONCodingTests/DateCodingTests.swift).
 
 ### UTF-16 and UTF-32
 
