@@ -1,29 +1,102 @@
 import PureSwiftJSONParsing
 
+enum JSONFuture {
+  case value(JSONValue)
+  case nestedArray(JSONArray)
+  case nestedObject(JSONObject)
+}
+
 class JSONArray {
   
-  private(set) var array: [JSONValue] = []
+  private(set) var array: [JSONFuture] = []
   
   init() {
     array.reserveCapacity(10)
   }
   
   @inline(__always) func append(_ element: JSONValue) {
-    self.array.append(element)
+    self.array.append(.value(element))
+  }
+  
+  @inline(__always) func appendArray() -> JSONArray {
+    let array = JSONArray()
+    self.array.append(.nestedArray(array))
+    return array
+  }
+  
+  @inline(__always) func appendObject() -> JSONObject {
+    let object = JSONObject()
+    self.array.append(.nestedObject(object))
+    return object
+  }
+  
+  var values: [JSONValue] {
+    self.array.map { (future) -> JSONValue in
+      switch future {
+      case .value(let value):
+        return value
+      case .nestedArray(let array):
+        return .array(array.values)
+      case .nestedObject(let object):
+        return .object(object.values)
+      }
+    }
   }
 }
 
 class JSONObject {
   
-  private(set) var dict: [String: JSONValue] = [:]
+  private(set) var dict: [String: JSONFuture] = [:]
   
   init() {
     dict.reserveCapacity(20)
   }
   
   @inline(__always) func set(_ value: JSONValue, for key: String) {
-    self.dict[key] = value
+    self.dict[key] = .value(value)
   }
+  
+  @inline(__always) func setArray(for key: String) -> JSONArray {
+    if case .nestedArray(let array) = self.dict[key] {
+      return array
+    }
+    
+    if case .nestedObject(_) = self.dict[key] {
+      preconditionFailure("For key \"\(key)\" a keyed container has already been created.")
+    }
+    
+    let array = JSONArray()
+    self.dict[key] = .nestedArray(array)
+    return array
+  }
+  
+  @inline(__always) func setObject(for key: String) -> JSONObject {
+    if case .nestedObject(let object) = self.dict[key] {
+      return object
+    }
+    
+    if case .nestedArray(_) = self.dict[key] {
+      preconditionFailure("For key \"\(key)\" an unkeyed container has already been created.")
+    }
+    
+    let object = JSONObject()
+    self.dict[key] = .nestedObject(object)
+    return object
+  }
+  
+  var values: [String: JSONValue] {
+    self.dict.mapValues { (future) -> JSONValue in
+      switch future {
+      case .value(let value):
+        return value
+      case .nestedArray(let array):
+        return .array(array.values)
+      case .nestedObject(let object):
+        return .object(object.values)
+      }
+    }
+  }
+
 }
 
 public class JSONEncoder {
@@ -62,17 +135,17 @@ class JSONEncoderImpl {
   
   var value: JSONValue? {
     if let object = self.object {
-      return .object(object.dict)
+      return .object(object.values)
     }
     if let array = self.array {
-      return .array(array.array)
+      return .array(array.values)
     }
     return self.singleValue
   }
   
   init(userInfo: [CodingUserInfoKey : Any], codingPath : [CodingKey]) {
     self.userInfo   = userInfo
-    self.codingPath = []
+    self.codingPath = codingPath
   }
 
 }
@@ -113,20 +186,5 @@ extension JSONEncoderImpl: Encoder {
     }
     
     return JSONSingleValueEncodingContainer(impl: self, codingPath: codingPath)
-  }
-}
-
-extension JSONEncoderImpl {
-  
-  func nestedContainer<NestedKey, Key>(keyedBy keyType: NestedKey.Type, forKey key: Key)
-    -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey, Key : CodingKey
-  {
-    preconditionFailure("unimplemented")
-  }
-
-  func nestedUnkeyedContainer<Key>(forKey key: Key)
-    -> UnkeyedEncodingContainer where Key : CodingKey
-  {
-    preconditionFailure("unimplemented")
   }
 }

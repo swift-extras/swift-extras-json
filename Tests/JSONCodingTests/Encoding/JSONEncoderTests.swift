@@ -84,5 +84,37 @@ class JSONEncoderTests: XCTestCase {
     }
   }
   
+  func testLastCodingPath() {
+    struct SubObject: Encodable {
+      let value: Int
+
+      func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        if let key = encoder.codingPath.last {
+          try container.encode(key.stringValue, forKey: .key)
+          try container.encode(value, forKey: .value)
+        }
+      }
+
+      private enum CodingKeys: String, CodingKey {
+        case key = "key"
+        case value = "value"
+      }
+    }
+
+    struct Object: Encodable {
+      let sub: SubObject
+    }
+
+    do {
+      let object = Object(sub: SubObject(value: 12))
+      let json = try PureSwiftJSONCoding.JSONEncoder().encode(object)
+      let parsed = try JSONParser().parse(bytes: json)
+      XCTAssertEqual(parsed, .object(["sub": .object(["key": .string("sub"), "value": .number("12")])]))
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
