@@ -34,10 +34,22 @@ struct JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
   }
 
   mutating func encode(_ value: Double, forKey key: Self.Key) throws {
+    guard !value.isNaN, !value.isInfinite else {
+      throw EncodingError.invalidValue(value, .init(
+        codingPath: self.codingPath + [key],
+        debugDescription: "Unable to encode Double.\(value) directly in JSON."))
+    }
+    
     try encodeFloatingPoint(value, key: key)
   }
 
   mutating func encode(_ value: Float, forKey key: Self.Key) throws {
+    guard !value.isNaN, !value.isInfinite else {
+      throw EncodingError.invalidValue(value, .init(
+        codingPath: self.codingPath + [key],
+        debugDescription: "Unable to encode Float.\(value) directly in JSON."))
+    }
+    
     try encodeFloatingPoint(value, key: key)
   }
 

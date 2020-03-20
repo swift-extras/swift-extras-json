@@ -4,6 +4,95 @@ import XCTest
 
 class JSONUnkeyedEncodingContainerTests: XCTestCase {
   
+  // MARK: - NaN & Inf -
+  
+  struct DoubleInArrayBox: Encodable {
+    let number: Double
+    
+    func encode(to encoder: Encoder) throws {
+      var container = encoder.unkeyedContainer()
+      try container.encode(number)
+    }
+  }
+  
+  func testEncodeDoubleNAN() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(DoubleInArrayBox(number: .nan))
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Double, let context) {
+      XCTAssert(value.isNaN) // expected
+      XCTAssertEqual(context.codingPath.count, 1)
+      XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
+      XCTAssertEqual(context.debugDescription, "Unable to encode Double.nan directly in JSON.")
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testEncodeDoubleInf() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(DoubleInArrayBox(number: .infinity))
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Double, let context) {
+      XCTAssert(value.isInfinite) // expected
+      XCTAssertEqual(context.codingPath.count, 1)
+      XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
+      XCTAssertEqual(context.debugDescription, "Unable to encode Double.inf directly in JSON.")
+    }
+    catch {
+      // missing expected catch
+       XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  struct FloatInArrayBox: Encodable {
+    let number: Float
+    
+    func encode(to encoder: Encoder) throws {
+      var container = encoder.unkeyedContainer()
+      try container.encode(number)
+    }
+  }
+  
+  func testEncodeFloatNAN() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(FloatInArrayBox(number: .nan))
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Float, let context) {
+      XCTAssert(value.isNaN) // expected
+      XCTAssertEqual(context.codingPath.count, 1)
+      XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
+      XCTAssertEqual(context.debugDescription, "Unable to encode Float.nan directly in JSON.")
+    }
+    catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+  
+  func testEncodeFloatInf() {
+    do {
+      let result = try PureSwiftJSONCoding.JSONEncoder().encode(FloatInArrayBox(number: .infinity))
+      XCTFail("Did not expect to have a result: \(result)")
+    }
+    catch Swift.EncodingError.invalidValue(let value as Float, let context) {
+      XCTAssert(value.isInfinite) // expected
+      XCTAssertEqual(context.codingPath.count, 1)
+      XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
+      XCTAssertEqual(context.debugDescription, "Unable to encode Float.inf directly in JSON.")
+    }
+    catch {
+      // missing expected catch
+       XCTFail("Unexpected error: \(error)")
+    }
+  }
+
+  
+  // MARK: - Nested Container -
+  
   func testNestedKeyedContainer() {
     struct ObjectInArray: Encodable {
       let firstName: String

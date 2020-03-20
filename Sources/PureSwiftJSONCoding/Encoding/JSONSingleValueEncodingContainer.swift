@@ -61,10 +61,22 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
   }
 
   mutating func encode(_ value: Float) throws {
+    guard !value.isNaN, !value.isInfinite else {
+      throw EncodingError.invalidValue(value, .init(
+        codingPath: self.codingPath,
+        debugDescription: "Unable to encode Float.\(value) directly in JSON."))
+    }
+    
     try encodeFloatingPoint(value)
   }
 
   mutating func encode(_ value: Double) throws {
+    guard !value.isNaN, !value.isInfinite else {
+      throw EncodingError.invalidValue(value, .init(
+        codingPath: self.codingPath,
+        debugDescription: "Unable to encode Double.\(value) directly in JSON."))
+    }
+    
     try encodeFloatingPoint(value)
   }
   
