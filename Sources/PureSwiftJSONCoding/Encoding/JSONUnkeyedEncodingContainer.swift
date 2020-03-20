@@ -12,7 +12,13 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     self.impl       = impl
     self.array      = impl.array!
     self.codingPath = codingPath
-    
+  }
+  
+  // used for nested containers
+  init(impl: JSONEncoderImpl, array: JSONArray, codingPath: [CodingKey]) {
+    self.impl       = impl
+    self.array      = array
+    self.codingPath = codingPath
   }
   
   mutating func encodeNil() throws {
@@ -90,11 +96,17 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
   mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type) ->
     KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey
   {
-    preconditionFailure()
+    let newPath = impl.codingPath + [ArrayKey(index: count)]
+    let object = self.array.appendObject()
+    let nestedContainer = JSONKeyedEncodingContainer<NestedKey>(impl: self.impl, object: object, codingPath: newPath)
+    return KeyedEncodingContainer(nestedContainer)
   }
   
   mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
-    preconditionFailure()
+    let newPath = impl.codingPath + [ArrayKey(index: count)]
+    let array = self.array.appendArray()
+    let nestedContainer = JSONUnkeyedEncodingContainer(impl: self.impl, array: array, codingPath: newPath)
+    return nestedContainer
   }
   
   mutating func superEncoder() -> Encoder {
