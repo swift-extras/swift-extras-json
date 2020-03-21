@@ -57,8 +57,31 @@ jobs:
       run: swift build -c release
       working-directory: ./PerfTests
     - name: Run test
-      run: .build/release/PureSwiftJSONCodingPerfTests
+      run: .build/release/CodingPerfTests
       working-directory: ./PerfTests
+
+  "tuxOS-Integration-Tests":
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        images:
+        - swift:5.1
+        - swiftlang/swift:nightly-5.2
+    container:
+      image: ${{ matrix.images }}
+      volumes:
+      - $GITHUB_WORKSPACE:/src
+      options: --workdir /src
+    env:
+      MAX_ALLOCS_ALLOWED_jsonvalue_to_bytes: 1000
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Test
+      run: ./run-tests.sh
+      working-directory: ./IntegrationTests
 
   "macOS-Tests":
     runs-on: macOS-latest
@@ -70,7 +93,7 @@ jobs:
     - name: Show all Xcode versions
       run: ls -an /Applications/ | grep Xcode*
     - name: Change Xcode command line tools
-      run: sudo xcode-select -s /Applications/Xcode_11.3.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/Xcode_11.4.app/Contents/Developer
     - name: Swift version
       run: swift --version
     # - name: SPM Build
@@ -79,7 +102,7 @@ jobs:
     #   run: swift test --parallel -Xswiftc -DDEBUG
     - name: Xcode Tests
       run: |
-        swift package generate-xcodeproj
+        swift package generate-xcodeproj --skip-extra-files --enable-code-coverage
         xcodebuild -quiet -parallel-testing-enabled YES -scheme pure-swift-json-Package -enableCodeCoverage YES build test
     - name: Codecov
       run: bash <(curl -s https://codecov.io/bash) -t ${{secrets.CODECOV_TOKEN}} -f *.coverage.txt
@@ -95,5 +118,5 @@ jobs:
       run: swift build -c release
       working-directory: ./PerfTests
     - name: Run test
-      run: .build/release/PureSwiftJSONCodingPerfTests
+      run: .build/release/CodingPerfTests
       working-directory: ./PerfTests
