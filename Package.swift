@@ -14,9 +14,18 @@ var package = Package(
       targets: ["PureSwiftJSONParsing"]),
   ],
   dependencies: [
-
+    // these are only used for testing
+    .package(url: "https://github.com/apple/swift-argument-parser.git", .upToNextMajor(from: "0.0.1")),
+    .package(url: "https://github.com/apple/swift-nio", .upToNextMajor(from: "2.13.0"))
   ],
   targets: [
+    .target(
+      name: "JSONTestSuiteCLI",
+      dependencies: [
+        .product(name: "ArgumentParser", package: "swift-argument-parser"),
+        .product(name: "NIO", package: "swift-nio"),
+      ]
+    ),
     .target(
       name: "PureSwiftJSONCoding",
       dependencies: ["PureSwiftJSONParsing"]),
