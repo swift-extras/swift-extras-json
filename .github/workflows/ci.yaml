@@ -102,7 +102,7 @@ jobs:
     #   run: swift test --parallel -Xswiftc -DDEBUG
     - name: Xcode Tests
       run: |
-        swift package generate-xcodeproj
+        swift package generate-xcodeproj --skip-extra-files --enable-code-coverage
         xcodebuild -quiet -parallel-testing-enabled YES -scheme pure-swift-json-Package -enableCodeCoverage YES build test
     - name: Codecov
       run: bash <(curl -s https://codecov.io/bash) -t ${{secrets.CODECOV_TOKEN}} -f *.coverage.txt
