@@ -60,6 +60,29 @@ jobs:
       run: .build/release/PureSwiftJSONCodingPerfTests
       working-directory: ./PerfTests
 
+  "tuxOS-Integration-Tests":
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        images:
+        - swift:5.1
+        - swiftlang/swift:nightly-5.2
+    container:
+      image: ${{ matrix.images }}
+      volumes:
+      - $GITHUB_WORKSPACE:/src
+      options: --workdir /src
+    env:
+      MAX_ALLOCS_ALLOWED_jsonvalue_to_bytes: 1000
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Test
+      run: ./run-tests.sh
+      working-directory: ./IntegrationTests
+
   "macOS-Tests":
     runs-on: macOS-latest
     steps:
