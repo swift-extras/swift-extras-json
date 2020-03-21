@@ -14,6 +14,6 @@ func run(identifier: String) {
       sampleJSON.appendBytes(to: &bytes)
     }
   
-    return 1_000
+    return bytes.count
   }
 }
