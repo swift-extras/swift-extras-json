@@ -3,66 +3,51 @@ import XCTest
 
 class ObjectParserTests: XCTestCase {
   
-  func testEmptyArray() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("{}".utf8))
-    let _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseObject()
-    XCTAssertEqual(result, [:])
+  func testEmptyObject() {
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8]("{}".utf8)))
+    XCTAssertEqual(result, .object([:]))
   }
   
-  func testSimpleKeyValueArray() throws {
-    var parser = JSONParserImpl(bytes: [UInt8](#"{ "hello" : "world" }"#.utf8))
-    let _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseObject()
-    XCTAssertEqual(result, ["hello": .string("world")])
+  func testSimpleKeyValueArray() {
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#"{ "hello" : "world" }"#.utf8)))
+    XCTAssertEqual(result, .object(["hello": .string("world")]))
   }
   
-  func testTwoKeyValueArray() throws {
-    let jsonString = #"{ "hello" : "world", "haha" \#n\#t: true }"#
-    var parser = JSONParserImpl(bytes: [UInt8](jsonString.utf8))
-    let _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseObject()
-    XCTAssertEqual(result, ["hello": .string("world"), "haha": .bool(true)])
+  func testTwoKeyValueArray() {
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes:
+      [UInt8](#"{ "hello" : "world", "haha" \#n\#t: true }"#.utf8)))
+    XCTAssertEqual(result, .object(["hello": .string("world"), "haha": .bool(true)]))
   }
   
-  func testHighlyNestedObject() throws {
+  func testHighlyNestedObject() {
     // test 512 should succeed
     let passingString = String(repeating: #"{"a":"#, count: 512) + "null" + String(repeating: "}", count: 512)
-    _  = try JSONParser().parse(bytes: [UInt8](passingString.utf8))
+    XCTAssertNoThrow(_ = try JSONParser().parse(bytes: [UInt8](passingString.utf8)))
     
     let failingString = String(repeating: #"{"a":"#, count: 513)
-    do {
-      _  = try JSONParser().parse(bytes: [UInt8](failingString.utf8))
-    }
-    catch JSONError.tooManyNestedArraysOrDictionaries(characterIndex: 2560) {
-      //expected case
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
+    XCTAssertThrowsError(_ = try JSONParser().parse(bytes: [UInt8](failingString.utf8))) { (error) in
+      XCTAssertEqual(error as? JSONError, .tooManyNestedArraysOrDictionaries(characterIndex: 2560))
     }
   }
   
   func testEmptyKey() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("{\"\": \"foobar\"}".utf8))
-    let _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseObject()
-    XCTAssertEqual(result, ["": .string("foobar")])
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8]("{\"\": \"foobar\"}".utf8)))
+    XCTAssertEqual(result, .object(["": .string("foobar")]))
   }
   
   func testDuplicateKey() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("{\"a\": \"foo\", \"a\": \"bar\"}".utf8))
-    let _ = try XCTUnwrap(parser.reader.read())
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8]("{\"a\": \"foo\", \"a\": \"bar\"}".utf8)))
     
     // current behavior is last key is given, should be documented?
     // rfc does not define how to handle duplicate keys
     // parser should be able to parse anyways
     
-    let result = try parser.parseObject()
-    XCTAssertEqual(result, ["a": .string("bar")])
+    XCTAssertEqual(result, .object(["a": .string("bar")]))
   }
 
 }
