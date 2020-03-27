@@ -15,7 +15,7 @@ jobs:
       matrix:
         images:
         - swift:5.1
-        - swiftlang/swift:nightly-5.2
+        - swift:5.2
     container:
       image: ${{ matrix.images }}
       volumes:
@@ -42,7 +42,7 @@ jobs:
       matrix:
         images:
         - swift:5.1
-        - swiftlang/swift:nightly-5.2
+        - swift:5.2
     container:
       image: ${{ matrix.images }}
       volumes:
@@ -66,7 +66,7 @@ jobs:
       matrix:
         images:
         - swift:5.1
-        - swiftlang/swift:nightly-5.2
+        - swift:5.2
     container:
       image: ${{ matrix.images }}
       volumes:
