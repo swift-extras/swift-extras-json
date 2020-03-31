@@ -22,7 +22,7 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
     }
   }
   
-  func testContains() throws {
+  func testContains() {
     let impl = JSONDecoderImpl(userInfo: [:], from: .object(["hello": .null, "world": .null]), codingPath: [])
     
     enum CodingKeys: String, CodingKey {
@@ -30,9 +30,10 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case haha
     }
     
-    let container = try impl.container(keyedBy: CodingKeys.self)
-    XCTAssertEqual(container.contains(.hello), true)
-    XCTAssertEqual(container.contains(.haha), false)
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertEqual(try XCTUnwrap(container).contains(.hello), true)
+    XCTAssertEqual(try XCTUnwrap(container).contains(.haha), false)
   }
   
   // MARK: - Null -
@@ -43,18 +44,14 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case hello
     }
     
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decodeNil(forKey: .hello)
-      XCTFail("Did not expect to get a result: \(result)")
-    }
-    catch Swift.DecodingError.keyNotFound(let codingKey, let context) {
-      // expected
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertThrowsError(try XCTUnwrap(container).decodeNil(forKey: .hello)) { (error) in
+      guard case Swift.DecodingError.keyNotFound(let codingKey, let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
       XCTAssertEqual(codingKey as? CodingKeys, .hello)
       XCTAssertEqual(context.debugDescription, "No value associated with key CodingKeys(stringValue: \"hello\", intValue: nil) (\"hello\").")
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
     }
   }
   
@@ -64,14 +61,11 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case hello
     }
     
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decodeNil(forKey: .hello)
-      XCTAssertEqual(result, true)
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
-    }
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    var result: Bool?
+    XCTAssertNoThrow(result = try XCTUnwrap(container).decodeNil(forKey: .hello))
+    XCTAssertEqual(result, true)
   }
   
   func testDecodeNullFromArray() {
@@ -80,14 +74,11 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case hello
     }
     
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decodeNil(forKey: .hello)
-      XCTAssertEqual(result, false)
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
-    }
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    var result: Bool?
+    XCTAssertNoThrow(result = try XCTUnwrap(container).decodeNil(forKey: .hello))
+    XCTAssertEqual(result, false)
   }
 
   // MARK: - String -
@@ -98,20 +89,16 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case hello
     }
     
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decode(String.self, forKey: .hello)
-      XCTFail("Did not expect to get a result: \(result)")
-    }
-    catch Swift.DecodingError.typeMismatch(let type, let context) {
-      // expected
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertThrowsError(try XCTUnwrap(container).decode(String.self, forKey: .hello)) { (error) in
+      guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
       XCTAssertTrue(type == String.self)
       XCTAssertEqual(context.codingPath.count, 1)
       XCTAssertEqual(context.codingPath.first as? CodingKeys, CodingKeys.hello)
       XCTAssertEqual(context.debugDescription, "Expected to decode String but found a number instead.")
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
     }
   }
   
@@ -121,18 +108,14 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case hello
     }
     
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decode(String.self, forKey: .hello)
-      XCTFail("Did not expect to get a result: \(result)")
-    }
-    catch Swift.DecodingError.keyNotFound(let codingKey, let context) {
-      // expected
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertThrowsError(try XCTUnwrap(container).decode(String.self, forKey: .hello)) { (error) in
+      guard case Swift.DecodingError.keyNotFound(let codingKey, let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
       XCTAssertEqual(codingKey as? CodingKeys, .hello)
       XCTAssertEqual(context.debugDescription, "No value associated with key CodingKeys(stringValue: \"hello\", intValue: nil) (\"hello\").")
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
     }
   }
   
@@ -144,20 +127,16 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case hello
     }
     
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decode(Bool.self, forKey: .hello)
-      XCTFail("Did not expect to get a result: \(result)")
-    }
-    catch Swift.DecodingError.typeMismatch(let type, let context) {
-      // expected
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertThrowsError(try XCTUnwrap(container).decode(Bool.self, forKey: .hello)) { (error) in
+      guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
       XCTAssertTrue(type == Bool.self)
       XCTAssertEqual(context.codingPath.count, 1)
       XCTAssertEqual(context.codingPath.first as? CodingKeys, CodingKeys.hello)
       XCTAssertEqual(context.debugDescription, "Expected to decode Bool but found a number instead.")
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
     }
   }
 
@@ -170,45 +149,35 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       case hello
     }
     
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decode(UInt8.self, forKey: .hello)
-      XCTFail("Did not expect to get a result: \(result)")
-    }
-    catch Swift.DecodingError.dataCorrupted(let context) {
-      // expected
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertThrowsError(try XCTUnwrap(container).decode(UInt8.self, forKey: .hello)) { (error) in
+      guard case Swift.DecodingError.dataCorrupted(let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
       XCTAssertEqual(context.codingPath.count, 1)
       XCTAssertEqual(context.codingPath.first as? CodingKeys, .hello)
       XCTAssertEqual(context.debugDescription, "Parsed JSON number <\(number)> does not fit in UInt8.")
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
     }
   }
   
   func testGetUInt8FromFloat() {
     let number = -3.14
     let type = UInt8.self
-    
     enum CodingKeys: String, CodingKey {
       case hello
     }
       
     let impl = JSONDecoderImpl(userInfo: [:], from: .object(["hello": .number("\(number)")]), codingPath: [])
-    
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decode(type.self, forKey: .hello)
-      XCTFail("Did not expect to get a result: \(result)")
-    }
-    catch Swift.DecodingError.dataCorrupted(let context) {
-      // expected
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertThrowsError(try XCTUnwrap(container).decode(type, forKey: .hello)) { (error) in
+      guard case Swift.DecodingError.dataCorrupted(let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
       XCTAssertEqual(context.codingPath.count, 1)
       XCTAssertEqual(context.codingPath.first as? CodingKeys, .hello)
       XCTAssertEqual(context.debugDescription, "Parsed JSON number <\(number)> does not fit in UInt8.")
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
     }
   }
   
@@ -220,21 +189,16 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
     }
       
     let impl = JSONDecoderImpl(userInfo: [:], from: .object(["hello": .bool(false)]), codingPath: [])
-    
-    do {
-      let container = try impl.container(keyedBy: CodingKeys.self)
-      let result = try container.decode(type.self, forKey: .hello)
-      XCTFail("Did not expect to get a result: \(result)")
-    }
-    catch Swift.DecodingError.typeMismatch(let type, let context) {
-      // expected
+    var container: KeyedDecodingContainer<CodingKeys>?
+    XCTAssertNoThrow(container = try impl.container(keyedBy: CodingKeys.self))
+    XCTAssertThrowsError(try XCTUnwrap(container).decode(type, forKey: .hello)) { (error) in
+      guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
       XCTAssertTrue(type == UInt8.self)
       XCTAssertEqual(context.codingPath.count, 1)
       XCTAssertEqual(context.codingPath.first as? CodingKeys, .hello)
       XCTAssertEqual(context.debugDescription, "Expected to decode UInt8 but found bool instead.")
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
     }
   }
 
@@ -551,4 +515,30 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+  
+  func testCantCreateSubDecoderForKey() {
+    struct Test: Decodable {
+      struct SubTest: Decodable {
+        let hello: String
+      }
+      
+      let sub: SubTest
+      
+      enum CodingKeys: String, CodingKey {
+        case sub
+      }
+    }
+      
+    let impl = JSONDecoderImpl(userInfo: [:], from: .object(["hello": .bool(false)]), codingPath: [])
+    
+    XCTAssertThrowsError(_ = try Test(from: impl)) { (error) in
+      guard case Swift.DecodingError.keyNotFound(let codingKey, let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
+      XCTAssertEqual(codingKey as? Test.CodingKeys, .sub)
+      XCTAssertEqual(context.debugDescription, "No value associated with key CodingKeys(stringValue: \"sub\", intValue: nil) (\"sub\").")
+    }
+    
+  }
+
 }

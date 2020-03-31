@@ -39,39 +39,6 @@ public struct JSONDecoder {
   @inlinable public func decode<T: Decodable>(_ type: T.Type) throws -> T {
     return try T.init(from: self)
   }
-  
-  internal func decoderForKey<Key: CodingKey>(_ key: Key) throws -> JSONDecoderImpl {
-    
-    switch self.json {
-    case .array(let array):
-      guard let key = key as? ArrayKey else {
-        preconditionFailure(
-          "For arrays we use the ArrayKey type as the key within this package.")
-      }
-      let json = array[key.intValue!]
-      var newPath = self.codingPath
-      newPath.append(key)
-      
-      return JSONDecoderImpl(
-        userInfo  : userInfo,
-        from      : json,
-        codingPath: newPath)
-      
-    case .object(let dictionary):
-      let json = dictionary[key.stringValue]!
-      var newPath = self.codingPath
-      newPath.append(key)
-      return JSONDecoderImpl(
-        userInfo  : userInfo,
-        from      : json,
-        codingPath: newPath)
-      
-    default:
-      
-      #warning("we need good error handling here")
-      preconditionFailure()
-    }
-  }
 }
 
 extension JSONDecoderImpl: Decoder {

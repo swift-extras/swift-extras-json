@@ -3,105 +3,47 @@ import XCTest
 
 class BoolParserTests: XCTestCase {
   
-  func testSimpleTrue() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("true".utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseBool()
-    XCTAssertEqual(result, true)
+  func testSimpleTrue() {
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8]("true".utf8)))
+    XCTAssertEqual(result, .bool(true))
   }
   
-  func testSimpleFalse() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("false".utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseBool()
-    XCTAssertEqual(result, false)
+  func testSimpleFalse() {
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8]("false".utf8)))
+    XCTAssertEqual(result, .bool(false))
   }
   
-  func testTrueMissingEnd() throws {
-    do {
-      _ = try JSONParser().parse(bytes: [UInt8]("tr".utf8))
-    }
-    catch JSONError.unexpectedEndOfFile {
-      // expected
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
+  func testTrueMissingEnd() {
+    XCTAssertThrowsError(_ = try JSONParser().parse(bytes: [UInt8]("tr".utf8))) { (error) in
+      XCTAssertEqual(error as? JSONError, .unexpectedEndOfFile)
     }
   }
   
-  func testFalseMissingEnd() throws {
-    do {
-      _ = try JSONParser().parse(bytes: [UInt8]("fal".utf8))
-    }
-    catch JSONError.unexpectedEndOfFile {
-      // expected
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
+  func testFalseMissingEnd() {
+    XCTAssertThrowsError(_ = try JSONParser().parse(bytes: [UInt8]("fal".utf8))) { (error) in
+      XCTAssertEqual(error as? JSONError, .unexpectedEndOfFile)
     }
   }
   
-  func testTrueMiddleCharacterInvalidCase() throws {
-    do {
-      _ = try JSONParser().parse(bytes: [UInt8]("trUe".utf8))
-    }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "U"), characterIndex: 2) {
-      // expected
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
+  func testTrueMiddleCharacterInvalidCase() {
+    XCTAssertThrowsError(_ = try JSONParser().parse(bytes: [UInt8]("trUe".utf8))) { (error) in
+      XCTAssertEqual(error as? JSONError, .unexpectedCharacter(ascii: UInt8(ascii: "U"), characterIndex: 2))
     }
   }
   
-  func testFalseOtherCharactersFollowing() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("false,".utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-    
-    let result = try parser.parseBool()
-    XCTAssertEqual(result, false)
-    
-    var remaining: [UInt8] = []
-    while let (byte, _) = parser.reader.read() {
-      remaining.append(byte)
-    }
-    
-    XCTAssertEqual(remaining, [UInt8(ascii: ",")])
-  }
-  
-  func testFalseMiddleCharacterInvalidCase() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("faLse,".utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-
+  func testFalseMiddleCharacterInvalidCase() {
     // rfc8259 §3
     // The literal names MUST be lowercase.  No other literal names are allowed.
-    do {
-      _ = try parser.parseBool()
-      XCTFail("this point should not be reached")
-    }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "L"), characterIndex: 2) {
-      // expected
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
+    XCTAssertThrowsError(_ = try JSONParser().parse(bytes: [UInt8]("faLse".utf8))) { (error) in
+      XCTAssertEqual(error as? JSONError, .unexpectedCharacter(ascii: UInt8(ascii: "L"), characterIndex: 2))
     }
   }
   
-  func testInvalidCharacter() throws {
-    var parser = JSONParserImpl(bytes: [UInt8]("fal67,".utf8))
-    _ = try XCTUnwrap(parser.reader.read())
-
-    
-    do {
-      _ = try parser.parseBool()
-      XCTFail("this point should not be reached")
-    }
-    catch JSONError.unexpectedCharacter(ascii: UInt8(ascii: "6"), characterIndex: 3) {
-      // expected
-    }
-    catch {
-      XCTFail("Unexpected error: \(error)")
+  func testInvalidCharacter() {
+    XCTAssertThrowsError(_ = try JSONParser().parse(bytes: [UInt8]("fal67".utf8))) { (error) in
+      XCTAssertEqual(error as? JSONError, .unexpectedCharacter(ascii: UInt8(ascii: "6"), characterIndex: 3))
     }
   }
 }

@@ -1,5 +1,5 @@
 
-public enum JSONError: Swift.Error {
+public enum JSONError: Swift.Error, Equatable {
   case unexpectedCharacter(ascii: UInt8, characterIndex: Int)
   case unexpectedEndOfFile
   case tooManyNestedArraysOrDictionaries(characterIndex: Int)
