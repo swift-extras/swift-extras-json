@@ -98,18 +98,18 @@ struct JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol 
   }
   
   func decode<T>(_ type: T.Type, forKey key: K) throws -> T where T : Decodable {
-    let decoder = try impl.decoderForKey(key)
+    let decoder = try self.decoderForKey(key)
     return try T.init(from: decoder)
   }
   
   func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type, forKey key: K) throws
     -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey
   {
-    return try impl.decoderForKey(key).container(keyedBy: type)
+    return try decoderForKey(key).container(keyedBy: type)
   }
   
   func nestedUnkeyedContainer(forKey key: K) throws -> UnkeyedDecodingContainer {
-    return try impl.decoderForKey(key).unkeyedContainer()
+    return try decoderForKey(key).unkeyedContainer()
   }
   
   func superDecoder() throws -> Decoder {
@@ -122,6 +122,17 @@ struct JSONKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContainerProtocol 
 }
 
 extension JSONKeyedDecodingContainer {
+  
+  private func decoderForKey(_ key: K) throws -> JSONDecoderImpl {
+    let value = try getValue(forKey: key)
+    var newPath = self.codingPath
+    newPath.append(key)
+    
+    return JSONDecoderImpl(
+      userInfo  : impl.userInfo,
+      from      : value,
+      codingPath: newPath)
+  }
   
   @inline(__always) private func getValue(forKey key: K) throws -> JSONValue {
     guard let value = self.dictionary[key.stringValue] else {

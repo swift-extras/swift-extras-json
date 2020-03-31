@@ -119,9 +119,11 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
       }
     }
     
-    let newKey  = ArrayKey(index: currentIndex)
-    let decoder = try impl.decoderForKey(newKey)
-    
+    let json = array[currentIndex]
+    var newPath = self.codingPath
+    newPath.append(ArrayKey(index: currentIndex))
+    let decoder = JSONDecoderImpl(userInfo: impl.userInfo, from: json, codingPath: newPath)
+  
     return try T.init(from: decoder)
   }
   

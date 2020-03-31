@@ -515,4 +515,30 @@ class JSONKeyedDecodingContainerTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+  
+  func testCantCreateSubDecoderForKey() {
+    struct Test: Decodable {
+      struct SubTest: Decodable {
+        let hello: String
+      }
+      
+      let sub: SubTest
+      
+      enum CodingKeys: String, CodingKey {
+        case sub
+      }
+    }
+      
+    let impl = JSONDecoderImpl(userInfo: [:], from: .object(["hello": .bool(false)]), codingPath: [])
+    
+    XCTAssertThrowsError(_ = try Test(from: impl)) { (error) in
+      guard case Swift.DecodingError.keyNotFound(let codingKey, let context) = error else {
+        XCTFail("Unexpected error: \(error)"); return
+      }
+      XCTAssertEqual(codingKey as? Test.CodingKeys, .sub)
+      XCTAssertEqual(context.debugDescription, "No value associated with key CodingKeys(stringValue: \"sub\", intValue: nil) (\"sub\").")
+    }
+    
+  }
+
 }
