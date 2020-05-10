@@ -16,24 +16,21 @@ jobs:
         images:
         - swift:5.1
         - swift:5.2
+        - swiftlang/swift:nightly-5.3-bionic
     container:
       image: ${{ matrix.images }}
-      volumes:
-      - $GITHUB_WORKSPACE:/src
-      options: --workdir /src
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
+      uses: actions/checkout@v2
     - name: Test
       run: swift test --enable-code-coverage --enable-test-discovery
     - name: Convert coverage files
       run: llvm-cov export -format="lcov" .build/debug/pure-swift-jsonPackageTests.xctest -instr-profile .build/debug/codecov/default.profdata > info.lcov
+    - name: Install curl
+      run: apt-get update && apt-get install -y curl # required by the codecov action.
     - name: Upload to codecov.io
-      uses: codecov/codecov-action@v1.0.3
+      uses: codecov/codecov-action@v1
       with:
-        token: ${{secrets.CODECOV_TOKEN}}
         file: info.lcov
 
   "tuxOS-Performance-Tests":
@@ -43,11 +40,9 @@ jobs:
         images:
         - swift:5.1
         - swift:5.2
+        - swiftlang/swift:nightly-5.3-bionic
     container:
       image: ${{ matrix.images }}
-      volumes:
-      - $GITHUB_WORKSPACE:/src
-      options: --workdir /src
     steps:
     - name: Checkout
       uses: actions/checkout@v1
@@ -67,11 +62,9 @@ jobs:
         images:
         - swift:5.1
         - swift:5.2
+        - swiftlang/swift:nightly-5.3-bionic
     container:
       image: ${{ matrix.images }}
-      volumes:
-      - $GITHUB_WORKSPACE:/src
-      options: --workdir /src
     env:
       MAX_ALLOCS_ALLOWED_jsonvalue_to_bytes: 0
     steps:
