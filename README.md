@@ -35,7 +35,7 @@ Add `pure-swift-json` as dependency to your `Package.swift`:
 
 ```swift
   dependencies: [
-    .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMajor(from: "0.1.0")),
+    .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMajor(from: "0.2.1")),
   ],
 ```
 
@@ -43,9 +43,9 @@ Add `PureSwiftJSONCoding` to the target you want to use it in.
 
 ```swift
   targets: [
-    .target(
-      name: "MyFancyTarget",
-      dependencies: ["PureSwiftJSONCoding"]),
+    .target(name: "MyFancyTarget", dependencies: [
+      .product(name: "PureSwiftJSONCoding", package: "pure-swift-json"),
+    ])
   ]
 ```
 
@@ -57,6 +57,70 @@ import PureSwiftJSONCoding
 let bytesArray  = try JSONEncoder().encode(myEncodable)
 let myDecodable = try JSONDecoder().decode(MyDecodable.self, from: bytes)
 ```
+
+### Use with SwiftNIO ByteBuffer
+
+For maximal performance create an `[UInt8]` from your `ByteBuffer`, even though `buffer.readableBytesView` would technically work as well.
+
+```swift
+let result = try pureDecoder.decode(
+  [SampleStructure].self,
+  from: buffer.readBytes(length: buffer.readableBytes)!)
+```
+
+```swift
+let bytes = try pureEncoder.encode(encodable)
+var buffer = byteBufferAllocator.buffer(capacity: bytes.count)
+buffer.writeBytes(bytes)
+```
+
+
+### Use with Vapor 4
+
+Increase the performance of your Vapor 4 API by using `pure-swift-json` instead of the default Foundation implementation. First you'll need to implement the conformance to Vapor's `ContentEncoder` and `ContentDecoder` as described in the [Vapor docs](https://docs.vapor.codes/4.0/content/#custom-coders).
+
+```swift
+import Vapor
+import PureSwiftJSONCoding
+
+extension PureSwiftJSONCoding.JSONEncoder: ContentEncoder {
+  public func encode<E: Encodable>(
+    _ encodable: E,
+    to body: inout ByteBuffer,
+    headers: inout HTTPHeaders) throws
+  {
+    headers.contentType = .json
+    let bytes = try self.encode(encodable)
+    // the buffer's storage is resized in case its capacity is not sufficient
+    body.writeBytes(bytes)
+  }
+}
+
+extension PureSwiftJSONCoding.JSONDecoder: ContentDecoder {
+  public func decode<D: Decodable>(
+    _ decodable: D.Type,
+    from body: ByteBuffer,
+    headers: HTTPHeaders) throws -> D
+  {
+    guard headers.contentType == .json || headers.contentType == .jsonAPI else {
+      throw Abort(.unsupportedMediaType)
+    }
+    var body = body
+    return try self.decode(D.self, from: body.readBytes(length: body.readableBytes)!)
+  }
+}
+```
+
+Next, register the encoder and decoder for use in Vapor:
+
+```swift
+let decoder = PureSwiftJSONCoding.JSONDecoder()
+ContentConfiguration.global.use(decoder: decoder, for: .json)
+
+let encoder = PureSwiftJSONCoding.JSONEncoder()
+ContentConfiguration.global.use(encoder: encoder, for: .json)
+```
+
 
 ## Performance
 
