@@ -112,29 +112,20 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
   }
   
   mutating func decode<T>(_ type: T.Type) throws -> T where T : Decodable {
-    defer {
-      currentIndex += 1
-      if currentIndex == count {
-        isAtEnd = true
-      }
-    }
-    
-    let json = array[currentIndex]
-    var newPath = self.codingPath
-    newPath.append(ArrayKey(index: currentIndex))
-    let decoder = JSONDecoderImpl(userInfo: impl.userInfo, from: json, codingPath: newPath)
-  
+    let decoder = try self.decoderForNextElement()
     return try T.init(from: decoder)
   }
   
   mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws
     -> KeyedDecodingContainer<NestedKey> where NestedKey : CodingKey
   {
-    return try impl.container(keyedBy: type)
+    let decoder = try self.decoderForNextElement()
+    return try decoder.container(keyedBy: type)
   }
   
   mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
-    return try impl.unkeyedContainer()
+    let decoder = try self.decoderForNextElement()
+    return try decoder.unkeyedContainer()
   }
   
   mutating func superDecoder() throws -> Decoder {
@@ -144,6 +135,24 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
 extension JSONUnkeyedDecodingContainer {
   
+  private mutating func decoderForNextElement() throws -> JSONDecoderImpl {
+    defer {
+      currentIndex += 1
+      if currentIndex == count {
+        isAtEnd = true
+      }
+    }
+    
+    let value = array[currentIndex]
+    var newPath = self.codingPath
+    newPath.append(ArrayKey(index: currentIndex))
+    
+    return JSONDecoderImpl(
+      userInfo  : impl.userInfo,
+      from      : value,
+      codingPath: newPath)
+  }
+
   @inline(__always) private func createTypeMismatchError(type: Any.Type, value: JSONValue) -> DecodingError {
     let codingPath = self.codingPath + [ArrayKey(index: currentIndex)]
     return DecodingError.typeMismatch(type, .init(
