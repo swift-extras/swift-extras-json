@@ -1,6 +1,5 @@
 import Foundation
-import PureSwiftJSONCoding
-import PureSwiftJSONParsing
+import PureSwiftJSON
 #if os(macOS)
     import SwiftyJSON
 #endif
@@ -21,7 +20,7 @@ func timing(name: String, execute: () throws -> Void) rethrows -> TimeInterval {
 
 let sampleString = SampleStructure.sampleJSON
 let sampleBytes = [UInt8](sampleString.utf8)
-let sampleStruct = try PureSwiftJSONCoding.JSONDecoder().decode([SampleStructure].self, from: sampleBytes)
+let sampleStruct = try PureSwiftJSON.JSONDecoder().decode([SampleStructure].self, from: sampleBytes)
 let sampleJSON = try JSONParser().parse(bytes: sampleBytes)
 
 print("Number of invocations: \(runs)")
@@ -54,7 +53,7 @@ let ikigaEncoding = try timing(name: "Ikiga                        ") {
     }
 }
 
-let pureEncoder = PureSwiftJSONCoding.JSONEncoder()
+let pureEncoder = PureSwiftJSON.JSONEncoder()
 let pureEncoding = try timing(name: "PureSwift                    ") {
     for _ in 1 ... runs {
         _ = try pureEncoder.encode(sampleStruct)
@@ -166,7 +165,7 @@ let ikigaDecodingBuffer = try timing(name: "IkigaJSON on NIO.ByteBuffer  ") {
     }
 }
 
-let pureDecoder = PureSwiftJSONCoding.JSONDecoder()
+let pureDecoder = PureSwiftJSON.JSONDecoder()
 let pureDecoding = try timing(name: "PureSwift on [UInt8]         ") {
     for _ in 1 ... runs {
         _ = try pureDecoder.decode([SampleStructure].self, from: sampleBytes)

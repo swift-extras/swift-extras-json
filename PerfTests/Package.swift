@@ -15,7 +15,12 @@ var package = Package(
     targets: [
         .target(
             name: "CodingPerfTests",
-            dependencies: ["PureSwiftJSONCoding", "PureSwiftJSONParsing", "NIO", "NIOFoundationCompat", "IkigaJSON"]
+            dependencies: [
+                .product(name: "PureSwiftJSON", package: "pure-swift-json"),
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOFoundationCompat", package: "swift-nio"),
+                .product(name: "IkigaJSON", package: "IkigaJSON"),
+            ]
         ),
     ]
 )
