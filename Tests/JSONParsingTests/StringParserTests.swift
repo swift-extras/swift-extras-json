@@ -28,6 +28,12 @@ class StringParserTests: XCTestCase {
     XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\u005A""#.utf8)))
     XCTAssertEqual(result, .string("Z"))
   }
+    
+  func testSimpleLowercaseEscapedUnicode() {
+    var result: JSONValue?
+    XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\u003c""#.utf8)))
+    XCTAssertEqual(result, .string("<"))
+  }
   
   func test12CharacterSequenceUnicode() {
     // from: https://en.wikipedia.org/wiki/UTF-16#Examples
