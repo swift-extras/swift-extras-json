@@ -1,4 +1,3 @@
-import PureSwiftJSON
 
 public struct JSONDecoder {
     @usableFromInline var userInfo: [CodingUserInfoKey: Any] = [:]

@@ -101,8 +101,10 @@ extension JSONValue {
         bytes.append(contentsOf: stringBytes[startCopyIndex ..< nextIndex])
         bytes.append(UInt8(ascii: "\""))
     }
+}
 
-    public var debugDataTypeDescription: String {
+extension JSONValue {
+    var debugDataTypeDescription: String {
         switch self {
         case .array:
             return "an array"
