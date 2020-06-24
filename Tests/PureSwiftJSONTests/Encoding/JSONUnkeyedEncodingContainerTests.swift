@@ -15,7 +15,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeDoubleNAN() {
         do {
-            let result = try PureSwiftJSON.JSONEncoder().encode(DoubleInArrayBox(number: .nan))
+            let result = try PSJSONEncoder().encode(DoubleInArrayBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
         } catch let Swift.EncodingError.invalidValue(value as Double, context) {
             XCTAssert(value.isNaN) // expected
@@ -29,7 +29,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeDoubleInf() {
         do {
-            let result = try PureSwiftJSON.JSONEncoder().encode(DoubleInArrayBox(number: .infinity))
+            let result = try PSJSONEncoder().encode(DoubleInArrayBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
         } catch let Swift.EncodingError.invalidValue(value as Double, context) {
             XCTAssert(value.isInfinite) // expected
@@ -53,7 +53,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeFloatNAN() {
         do {
-            let result = try PureSwiftJSON.JSONEncoder().encode(FloatInArrayBox(number: .nan))
+            let result = try PSJSONEncoder().encode(FloatInArrayBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
         } catch let Swift.EncodingError.invalidValue(value as Float, context) {
             XCTAssert(value.isNaN) // expected
@@ -67,7 +67,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeFloatInf() {
         do {
-            let result = try PureSwiftJSON.JSONEncoder().encode(FloatInArrayBox(number: .infinity))
+            let result = try PSJSONEncoder().encode(FloatInArrayBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
         } catch let Swift.EncodingError.invalidValue(value as Float, context) {
             XCTAssert(value.isInfinite) // expected
@@ -102,7 +102,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
         do {
             let object = ObjectInArray(firstName: "Adam", surname: "Fowler")
-            let json = try PureSwiftJSON.JSONEncoder().encode(object)
+            let json = try PSJSONEncoder().encode(object)
 
             let parsed = try JSONParser().parse(bytes: json)
             XCTAssertEqual(parsed, .array([.object(["firstName": .string("Adam"), "surname": .string("Fowler")])]))
@@ -128,7 +128,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
         do {
             let object = NumbersInArray(numbers: [1, 2, 3, 4])
-            let json = try PureSwiftJSON.JSONEncoder().encode(object)
+            let json = try PSJSONEncoder().encode(object)
 
             let parsed = try JSONParser().parse(bytes: json)
             XCTAssertEqual(parsed, .array([.array([.number("1"), .number("2"), .number("3"), .number("4")])]))

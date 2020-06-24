@@ -32,7 +32,7 @@ class JSONDecoderTests: XCTestCase {
             }
             """
 
-            let result = try JSONDecoder().decode(HelloWorld.self, from: [UInt8](string.utf8))
+            let result = try PSJSONDecoder().decode(HelloWorld.self, from: [UInt8](string.utf8))
 
             XCTAssertEqual(result.hello, "world")
             XCTAssertEqual(result.subStruct, HelloWorld.SubStruct(name: "hihi"))
@@ -53,7 +53,7 @@ class JSONDecoderTests: XCTestCase {
         }
 
         let json = #"{"hello":"world"}"#
-        XCTAssertThrowsError(_ = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
+        XCTAssertThrowsError(_ = try PSJSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
             error in
             guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
@@ -77,7 +77,7 @@ class JSONDecoderTests: XCTestCase {
         }
 
         let json = #"["haha", "hihi"]"#
-        XCTAssertThrowsError(_ = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
+        XCTAssertThrowsError(_ = try PSJSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
             error in
             guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
@@ -100,7 +100,7 @@ class JSONDecoderTests: XCTestCase {
         }
 
         let json = #"{"hello👩‍👩‍👧‍👧" 123 }"#
-        XCTAssertThrowsError(_ = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
+        XCTAssertThrowsError(_ = try PSJSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
             error in
             guard case let Swift.DecodingError.dataCorrupted(context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
