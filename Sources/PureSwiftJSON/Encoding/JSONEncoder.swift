@@ -95,7 +95,7 @@ class JSONObject {
     }
 }
 
-public class JSONEncoder {
+public struct JSONEncoder {
     var userInfo: [CodingUserInfoKey: Any] = [:]
 
     public init() {}
