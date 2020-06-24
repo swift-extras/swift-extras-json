@@ -219,7 +219,11 @@ public struct DocumentReader {
     case 48...57:
       return ascii - 48
     case 65...70:
+      // uppercase letters
       return ascii - 55
+    case 97...102:
+      // lowercase letters
+      return ascii - 87
     default:
       return nil
     }
