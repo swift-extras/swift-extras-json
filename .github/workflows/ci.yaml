@@ -9,6 +9,16 @@ on:
 
 jobs:
 
+  "sanity-Tests":
+    runs-on: macOS-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install swiftformat
+      run: brew install swiftformat
+    - name: Run sanity
+      run: ./scripts/sanity.sh .
+
   "tuxOS-Tests":
     runs-on: ubuntu-latest
     strategy:
