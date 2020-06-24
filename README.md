@@ -9,8 +9,6 @@ The implementation is [RFC8259](https://tools.ietf.org/html/rfc8259) compliant. 
 
 If you like the idea of using pure Swift without any dependencies, you might also like my reimplementation of Base64 in pure Swift: [`swift-base64-kit`](https://github.com/fabianfett/swift-base64-kit)
 
-‼️ **NOTE:** This is at a very early stage of development. Please take into account that the API might change while in pre-release.
-
 ## Goals
 
 - [x] does not use Foundation at all
