@@ -52,16 +52,15 @@ class JSONDecoderTests: XCTestCase {
             }
         }
 
-        do {
-            let json = #"{"hello":"world"}"#
-            let result = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
-            XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
-            // expected
+        let json = #"{"hello":"world"}"#
+        XCTAssertThrowsError(_ = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
+            error in
+            guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
+                XCTFail("Unexpected error: \(error)"); return
+            }
+
             XCTAssertTrue(type == [JSONValue].self)
             XCTAssertEqual(context.debugDescription, "Expected to decode Array<JSONValue> but found a dictionary instead.")
-        } catch {
-            XCTFail("Unexpected error: \(error)")
         }
     }
 
@@ -77,16 +76,15 @@ class JSONDecoderTests: XCTestCase {
             }
         }
 
-        do {
-            let json = #"["haha", "hihi"]"#
-            let result = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
-            XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
-            // expected
+        let json = #"["haha", "hihi"]"#
+        XCTAssertThrowsError(_ = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
+            error in
+            guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
+                XCTFail("Unexpected error: \(error)"); return
+            }
+
             XCTAssertTrue(type == [String: JSONValue].self)
             XCTAssertEqual(context.debugDescription, "Expected to decode Dictionary<String, JSONValue> but found an array instead.")
-        } catch {
-            XCTFail("Unexpected error: \(error)")
         }
     }
 
@@ -101,17 +99,16 @@ class JSONDecoderTests: XCTestCase {
             }
         }
 
-        do {
-            let json = #"{"hello👩‍👩‍👧‍👧" 123 }"#
-            let result = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
-            XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
-            // expected
+        let json = #"{"hello👩‍👩‍👧‍👧" 123 }"#
+        XCTAssertThrowsError(_ = try PureSwiftJSON.JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
+            error in
+            guard case let Swift.DecodingError.dataCorrupted(context) = error else {
+                XCTFail("Unexpected error: \(error)"); return
+            }
+
             XCTAssertEqual(context.codingPath.count, 0)
             XCTAssertEqual(context.debugDescription, "Unexpected character `1` at character index: 34")
             XCTAssertNotNil(context.underlyingError)
-        } catch {
-            XCTFail("Unexpected error: \(error)")
         }
     }
 }

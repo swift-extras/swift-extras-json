@@ -101,21 +101,23 @@ public class JSONEncoder {
     public init() {}
 
     public func encode<T: Encodable>(_ value: T) throws -> [UInt8] {
+        let value: JSONValue = try encodeAsJSONValue(value)
+        var bytes = [UInt8]()
+        value.appendBytes(to: &bytes)
+        return bytes
+    }
+
+    public func encodeAsJSONValue<T: Encodable>(_ value: T) throws -> JSONValue {
         let encoder = JSONEncoderImpl(userInfo: userInfo, codingPath: [])
 
         try value.encode(to: encoder)
 
         // if the top level encoder does not have a value
         // we don't have a value at all and we should return `null`
-        let value = encoder.value ?? .null
-
-        var bytes = [UInt8]()
-        value.appendBytes(to: &bytes)
-        return bytes
+        return encoder.value ?? .null
     }
 }
 
-/// TBD: This could be done with a struct on the stack, by using inout references.
 class JSONEncoderImpl {
     let userInfo: [CodingUserInfoKey: Any]
     let codingPath: [CodingKey]

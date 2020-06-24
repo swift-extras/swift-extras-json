@@ -8,11 +8,15 @@ public struct JSONDecoder {
         throws -> T where Bytes.Element == UInt8 {
         do {
             let json = try JSONParser().parse(bytes: bytes)
-            let decoder = JSONDecoderImpl(userInfo: userInfo, from: json, codingPath: [])
-            return try decoder.decode(T.self)
+            return try decode(T.self, from: json)
         } catch let error as JSONError {
             throw error.decodingError
         }
+    }
+
+    @inlinable public func decode<T: Decodable>(_: T.Type, from json: JSONValue) throws -> T {
+        let decoder = JSONDecoderImpl(userInfo: userInfo, from: json, codingPath: [])
+        return try decoder.decode(T.self)
     }
 }
 
