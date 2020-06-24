@@ -6,37 +6,15 @@ import PackageDescription
 var package = Package(
     name: "pure-swift-json",
     products: [
-        .library(
-            name: "PureSwiftJSONCoding",
-            targets: ["PureSwiftJSONCoding"]
-        ),
-        .library(
-            name: "PureSwiftJSONParsing",
-            targets: ["PureSwiftJSONParsing"]
-        ),
-    ],
-    dependencies: [
+        .library(name: "PureSwiftJSON", targets: ["PureSwiftJSON"]),
     ],
     targets: [
-        .target(
-            name: "PureSwiftJSONCoding",
-            dependencies: ["PureSwiftJSONParsing"]
-        ),
-        .target(
-            name: "PureSwiftJSONParsing",
-            dependencies: []
-        ),
-        .testTarget(
-            name: "JSONCodingTests",
-            dependencies: ["PureSwiftJSONCoding"]
-        ),
-        .testTarget(
-            name: "JSONParsingTests",
-            dependencies: ["PureSwiftJSONParsing"]
-        ),
-        .testTarget(
-            name: "LearningTests",
-            dependencies: ["PureSwiftJSONParsing"]
-        ),
+        .target(name: "PureSwiftJSON"),
+        .testTarget(name: "PureSwiftJSONTests", dependencies: [
+            .byName(name: "PureSwiftJSON"),
+        ]),
+        .testTarget(name: "LearningTests", dependencies: [
+            .byName(name: "PureSwiftJSON"),
+        ]),
     ]
 )

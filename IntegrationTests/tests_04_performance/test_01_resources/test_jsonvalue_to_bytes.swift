@@ -1,4 +1,4 @@
-import PureSwiftJSONParsing
+import PureSwiftJSON
 
 func run(identifier: String) {
     let sampleString = SampleStructure.sampleJSON
