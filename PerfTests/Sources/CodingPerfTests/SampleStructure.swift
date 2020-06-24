@@ -1,63 +1,61 @@
 
 struct SampleStructure: Codable {
-  
-  struct Friend: Codable {
-    let id: Int
+    struct Friend: Codable {
+        let id: Int
+        let name: String
+    }
+
+    let id: String
+    let index: Int
+    let guid: String
+    let isActive: Bool
+    let balance: String
+    let picture: String
+    let age: Int
+    let eyeColor: String
     let name: String
-  }
-  
-  let id: String
-  let index: Int
-  let guid: String
-  let isActive: Bool
-  let balance: String
-  let picture: String
-  let age: Int
-  let eyeColor: String
-  let name: String
-  let gender: String
-  let company: String
-  let email: String
-  let phone: String
-  let address: String
-  let about: String
-  let registered: String
-  let latitude: Double
-  let longitude: Double
-  let tags: [String]
-  let friends: [Friend]
-  let greeting: String
-  let favoriteFruit: String
-  
-  enum CodingKeys: String, CodingKey {
-    case id = "_id"
-    case index
-    case guid
-    case isActive
-    case balance
-    case picture
-    case age
-    case eyeColor
-    case name
-    case gender
-    case company
-    case email
-    case phone
-    case address
-    case about
-    case registered
-    case latitude
-    case longitude
-    case tags
-    case friends
-    case greeting
-    case favoriteFruit
-  }
+    let gender: String
+    let company: String
+    let email: String
+    let phone: String
+    let address: String
+    let about: String
+    let registered: String
+    let latitude: Double
+    let longitude: Double
+    let tags: [String]
+    let friends: [Friend]
+    let greeting: String
+    let favoriteFruit: String
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case index
+        case guid
+        case isActive
+        case balance
+        case picture
+        case age
+        case eyeColor
+        case name
+        case gender
+        case company
+        case email
+        case phone
+        case address
+        case about
+        case registered
+        case latitude
+        case longitude
+        case tags
+        case friends
+        case greeting
+        case favoriteFruit
+    }
 }
 
 extension SampleStructure {
-  
-  static let sampleJSON = """
+    static let sampleJSON = """
     [
       {
         "_id": "5e24ed2749789afeebcaa1ca",

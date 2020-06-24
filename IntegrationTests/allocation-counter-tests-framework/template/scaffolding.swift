@@ -12,12 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Foundation
 import AtomicCounter
+import Foundation
 #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-import Darwin
+    import Darwin
 #else
-import Glibc
+    import Glibc
 #endif
 
 func measureAll(_ fn: () -> Int) -> [[String: Int]] {
@@ -25,13 +25,13 @@ func measureAll(_ fn: () -> Int) -> [[String: Int]] {
         AtomicCounter.reset_free_counter()
         AtomicCounter.reset_malloc_counter()
         AtomicCounter.reset_malloc_bytes_counter()
-#if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-        autoreleasepool {
+        #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
+            autoreleasepool {
+                _ = fn()
+            }
+        #else
             _ = fn()
-        }
-#else
-        _ = fn()
-#endif
+        #endif
         usleep(100_000) // allocs/frees happen on multiple threads, allow some cool down time
         let frees = AtomicCounter.read_free_counter()
         let mallocs = AtomicCounter.read_malloc_counter()
@@ -39,20 +39,20 @@ func measureAll(_ fn: () -> Int) -> [[String: Int]] {
         return [
             "total_allocations": mallocs,
             "total_allocated_bytes": mallocedBytes,
-            "remaining_allocations": mallocs - frees
+            "remaining_allocations": mallocs - frees,
         ]
     }
 
     _ = measureOne(fn) /* pre-heat and throw away */
     usleep(100_000) // allocs/frees happen on multiple threads, allow some cool down time
     var measurements: [[String: Int]] = []
-    for _ in 0..<10 {
+    for _ in 0 ..< 10 {
         measurements.append(measureOne(fn))
     }
     return measurements
 }
 
-func measureAndPrint(desc: String, fn: () -> Int) -> Void {
+func measureAndPrint(desc: String, fn: () -> Int) {
     let measurements = measureAll(fn)
     for k in measurements[0].keys {
         let vs = measurements.map { $0[k]! }
@@ -63,6 +63,6 @@ func measureAndPrint(desc: String, fn: () -> Int) -> Void {
 
 public func measure(identifier: String, _ body: () -> Int) {
     measureAndPrint(desc: identifier) {
-        return body()
+        body()
     }
 }
