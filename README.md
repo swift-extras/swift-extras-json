@@ -39,12 +39,12 @@ Add `pure-swift-json` as dependency to your `Package.swift`:
   ],
 ```
 
-Add `PureSwiftJSONCoding` to the target you want to use it in.
+Add `PureSwiftJSON` to the target you want to use it in.
 
 ```swift
   targets: [
     .target(name: "MyFancyTarget", dependencies: [
-      .product(name: "PureSwiftJSONCoding", package: "pure-swift-json"),
+      .product(name: "PureSwiftJSON", package: "pure-swift-json"),
     ])
   ]
 ```
@@ -52,7 +52,7 @@ Add `PureSwiftJSONCoding` to the target you want to use it in.
 Use it as you would use the Foundation encoder and decoder.
 
 ```swift
-import PureSwiftJSONCoding
+import PureSwiftJSON
 
 let bytesArray  = try JSONEncoder().encode(myEncodable)
 let myDecodable = try JSONDecoder().decode(MyDecodable.self, from: bytes)
@@ -81,9 +81,9 @@ Increase the performance of your Vapor 4 API by using `pure-swift-json` instead 
 
 ```swift
 import Vapor
-import PureSwiftJSONCoding
+import PureSwiftJSON
 
-extension PureSwiftJSONCoding.JSONEncoder: ContentEncoder {
+extension PureSwiftJSON.JSONEncoder: ContentEncoder {
   public func encode<E: Encodable>(
     _ encodable: E,
     to body: inout ByteBuffer,
@@ -96,7 +96,7 @@ extension PureSwiftJSONCoding.JSONEncoder: ContentEncoder {
   }
 }
 
-extension PureSwiftJSONCoding.JSONDecoder: ContentDecoder {
+extension PureSwiftJSON.JSONDecoder: ContentDecoder {
   public func decode<D: Decodable>(
     _ decodable: D.Type,
     from body: ByteBuffer,
@@ -114,10 +114,10 @@ extension PureSwiftJSONCoding.JSONDecoder: ContentDecoder {
 Next, register the encoder and decoder for use in Vapor:
 
 ```swift
-let decoder = PureSwiftJSONCoding.JSONDecoder()
+let decoder = PureSwiftJSON.JSONDecoder()
 ContentConfiguration.global.use(decoder: decoder, for: .json)
 
-let encoder = PureSwiftJSONCoding.JSONEncoder()
+let encoder = PureSwiftJSON.JSONEncoder()
 ContentConfiguration.global.use(encoder: encoder, for: .json)
 ```
 

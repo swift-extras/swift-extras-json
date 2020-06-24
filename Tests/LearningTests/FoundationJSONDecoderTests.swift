@@ -1,4 +1,4 @@
-import PureSwiftJSONParsing
+import PureSwiftJSON
 import XCTest
 
 class FoundationJSONDecoderTests: XCTestCase {

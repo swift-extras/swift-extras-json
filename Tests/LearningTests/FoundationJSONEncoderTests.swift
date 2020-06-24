@@ -1,4 +1,4 @@
-import PureSwiftJSONParsing
+import PureSwiftJSON
 import XCTest
 
 class FoundationJSONEncoderTests: XCTestCase {
@@ -13,7 +13,7 @@ class FoundationJSONEncoderTests: XCTestCase {
 
     func testEncodeHelloWorld() throws {
         let hello = HelloWorld()
-        let result = try JSONEncoder().encode(hello)
+        let result = try Foundation.JSONEncoder().encode(hello)
 
         let value = try JSONParser().parse(bytes: result)
         XCTAssertEqual(value, .object([
@@ -25,7 +25,7 @@ class FoundationJSONEncoderTests: XCTestCase {
     #if canImport(Darwin)
         // this works only on Darwin, on Linux an error is thrown.
         func testEncodeNull() throws {
-            let result = try JSONEncoder().encode(nil as String?)
+            let result = try Foundation.JSONEncoder().encode(nil as String?)
 
             let json = String(data: result, encoding: .utf8)
             XCTAssertEqual(json, "null")
@@ -35,7 +35,7 @@ class FoundationJSONEncoderTests: XCTestCase {
     #if canImport(Darwin)
         // this works only on Darwin, on Linux an error is thrown.
         func testEncodeTopLevelString() throws {
-            let result = try JSONEncoder().encode("Hello World")
+            let result = try Foundation.JSONEncoder().encode("Hello World")
 
             let json = String(data: result, encoding: .utf8)
             XCTAssertEqual(json, #""Hello World""#)
@@ -44,7 +44,7 @@ class FoundationJSONEncoderTests: XCTestCase {
 
     func testEncodeTopLevelDoubleNaN() throws {
         do {
-            _ = try JSONEncoder().encode(Double.nan)
+            _ = try Foundation.JSONEncoder().encode(Double.nan)
         } catch let Swift.EncodingError.invalidValue(value as Double, _) {
             XCTAssert(value.isNaN) // expected
         } catch {
@@ -54,7 +54,7 @@ class FoundationJSONEncoderTests: XCTestCase {
 
     func testEncodeTopLevelDoubleInfinity() throws {
         do {
-            _ = try JSONEncoder().encode(Double.infinity)
+            _ = try Foundation.JSONEncoder().encode(Double.infinity)
         } catch let Swift.EncodingError.invalidValue(value as Double, context) {
             print(context)
             XCTAssert(value.isInfinite) // expected
@@ -69,7 +69,7 @@ class FoundationJSONEncoderTests: XCTestCase {
 
     func testEncodeKeyedContainterDoubleInfinity() throws {
         do {
-            _ = try JSONEncoder().encode(DoubleBox(number: Double.infinity))
+            _ = try Foundation.JSONEncoder().encode(DoubleBox(number: Double.infinity))
         } catch let Swift.EncodingError.invalidValue(value as Double, context) {
             print(context)
             XCTAssert(value.isInfinite) // expected
@@ -89,7 +89,7 @@ class FoundationJSONEncoderTests: XCTestCase {
 
     func testEncodeDoubleInUnkeyedContainerNAN() {
         do {
-            let result = try JSONEncoder().encode(DoubleInArrayBox(number: .nan))
+            let result = try Foundation.JSONEncoder().encode(DoubleInArrayBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
         } catch let Swift.EncodingError.invalidValue(value as Double, context) {
             XCTAssert(value.isNaN) // expected
