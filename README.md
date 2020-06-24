@@ -54,8 +54,8 @@ Use it as you would use the Foundation encoder and decoder.
 ```swift
 import PureSwiftJSON
 
-let bytesArray  = try JSONEncoder().encode(myEncodable)
-let myDecodable = try JSONDecoder().decode(MyDecodable.self, from: bytes)
+let bytesArray  = try PSJSONEncoder().encode(myEncodable)
+let myDecodable = try PSJSONDecoder().decode(MyDecodable.self, from: bytes)
 ```
 
 ### Use with SwiftNIO ByteBuffer
@@ -83,7 +83,7 @@ Increase the performance of your Vapor 4 API by using `pure-swift-json` instead 
 import Vapor
 import PureSwiftJSON
 
-extension PureSwiftJSON.JSONEncoder: ContentEncoder {
+extension PSJSONEncoder: ContentEncoder {
   public func encode<E: Encodable>(
     _ encodable: E,
     to body: inout ByteBuffer,
@@ -96,7 +96,7 @@ extension PureSwiftJSON.JSONEncoder: ContentEncoder {
   }
 }
 
-extension PureSwiftJSON.JSONDecoder: ContentDecoder {
+extension PSJSONDecoder: ContentDecoder {
   public func decode<D: Decodable>(
     _ decodable: D.Type,
     from body: ByteBuffer,
@@ -114,10 +114,10 @@ extension PureSwiftJSON.JSONDecoder: ContentDecoder {
 Next, register the encoder and decoder for use in Vapor:
 
 ```swift
-let decoder = PureSwiftJSON.JSONDecoder()
+let decoder = PSJSONDecoder()
 ContentConfiguration.global.use(decoder: decoder, for: .json)
 
-let encoder = PureSwiftJSON.JSONEncoder()
+let encoder = PSJSONEncoder()
 ContentConfiguration.global.use(encoder: encoder, for: .json)
 ```
 

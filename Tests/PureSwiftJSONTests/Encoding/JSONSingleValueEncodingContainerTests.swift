@@ -19,7 +19,7 @@ class JSONSingleValueEncodingContainerTests: XCTestCase {
 
         let object = Object(name: Name(firstName: "Adam", surname: "Fowler"))
         var json: [UInt8]?
-        XCTAssertNoThrow(json = try PureSwiftJSON.JSONEncoder().encode(object))
+        XCTAssertNoThrow(json = try PSJSONEncoder().encode(object))
 
         var parsed: JSONValue?
         XCTAssertNoThrow(parsed = try JSONParser().parse(bytes: XCTUnwrap(json)))

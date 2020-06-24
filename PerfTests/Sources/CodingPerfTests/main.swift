@@ -20,7 +20,7 @@ func timing(name: String, execute: () throws -> Void) rethrows -> TimeInterval {
 
 let sampleString = SampleStructure.sampleJSON
 let sampleBytes = [UInt8](sampleString.utf8)
-let sampleStruct = try PureSwiftJSON.JSONDecoder().decode([SampleStructure].self, from: sampleBytes)
+let sampleStruct = try PSJSONDecoder().decode([SampleStructure].self, from: sampleBytes)
 let sampleJSON = try JSONParser().parse(bytes: sampleBytes)
 
 print("Number of invocations: \(runs)")
@@ -39,7 +39,7 @@ let toBytes = timing(name: "PureSwift                    ") {
 print("------------------------------------------")
 print("Encoding")
 
-let foundationEncoder = Foundation.JSONEncoder()
+let foundationEncoder = JSONEncoder()
 let foundationEncoding = try timing(name: "Foundation                   ") {
     for _ in 1 ... runs {
         _ = try foundationEncoder.encode(sampleStruct)
@@ -53,7 +53,7 @@ let ikigaEncoding = try timing(name: "Ikiga                        ") {
     }
 }
 
-let pureEncoder = PureSwiftJSON.JSONEncoder()
+let pureEncoder = PSJSONEncoder()
 let pureEncoding = try timing(name: "PureSwift                    ") {
     for _ in 1 ... runs {
         _ = try pureEncoder.encode(sampleStruct)
@@ -128,7 +128,7 @@ let pureParsingBuffer = try timing(name: "PureSwift on NIO.ByteBuffer  ") {
 print("------------------------------------------")
 print("Decoding")
 
-let foundationDecoder = Foundation.JSONDecoder()
+let foundationDecoder = JSONDecoder()
 let foundationDecoding = try timing(name: "Foundation on Foundation.Data") {
     for _ in 1 ... runs {
         _ = try foundationDecoder.decode([SampleStructure].self, from: sampleData)
@@ -165,7 +165,7 @@ let ikigaDecodingBuffer = try timing(name: "IkigaJSON on NIO.ByteBuffer  ") {
     }
 }
 
-let pureDecoder = PureSwiftJSON.JSONDecoder()
+let pureDecoder = PSJSONDecoder()
 let pureDecoding = try timing(name: "PureSwift on [UInt8]         ") {
     for _ in 1 ... runs {
         _ = try pureDecoder.decode([SampleStructure].self, from: sampleBytes)

@@ -1,5 +1,5 @@
 
-public struct JSONDecoder {
+public struct PSJSONDecoder {
     @usableFromInline var userInfo: [CodingUserInfoKey: Any] = [:]
 
     public init() {}
