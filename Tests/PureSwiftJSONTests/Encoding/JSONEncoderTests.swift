@@ -132,4 +132,15 @@ class JSONEncoderTests: XCTestCase {
         XCTAssertNoThrow(parsed = try JSONParser().parse(bytes: XCTUnwrap(result)))
         XCTAssertEqual(parsed, .object(["sub": .object(["key": .string("sub"), "value": .number("12")])]))
     }
+
+    func testIfUserInfoIsHandedDown() {
+        struct Foo: Encodable {
+            func encode(to encoder: Encoder) throws {
+                XCTAssertEqual(encoder.userInfo as? [CodingUserInfoKey: String], [CodingUserInfoKey(rawValue: "foo")!: "bar"])
+            }
+        }
+        var encoder = PSJSONEncoder()
+        encoder.userInfo[CodingUserInfoKey(rawValue: "foo")!] = "bar"
+        XCTAssertNoThrow(_ = try encoder.encode(Foo()))
+    }
 }

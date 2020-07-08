@@ -111,4 +111,32 @@ class JSONDecoderTests: XCTestCase {
             XCTAssertNotNil(context.underlyingError)
         }
     }
+
+    func testDecodeEmptyArray() {
+        let json = """
+        {
+            "array": []
+        }
+        """
+        struct Foo: Decodable {
+            let array: [String]
+        }
+        let decoder = PSJSONDecoder()
+
+        var result: Foo?
+        XCTAssertNoThrow(result = try decoder.decode(Foo.self, from: json.utf8))
+        XCTAssertEqual(result?.array, [])
+    }
+
+    func testIfUserInfoIsHandedDown() {
+        let json = "{}"
+        struct Foo: Decodable {
+            init(decoder: Decoder) {
+                XCTAssertEqual(decoder.userInfo as? [CodingUserInfoKey: String], [CodingUserInfoKey(rawValue: "foo")!: "bar"])
+            }
+        }
+        var decoder = PSJSONDecoder()
+        decoder.userInfo[CodingUserInfoKey(rawValue: "foo")!] = "bar"
+        XCTAssertNoThrow(_ = try decoder.decode(Foo.self, from: json.utf8))
+    }
 }

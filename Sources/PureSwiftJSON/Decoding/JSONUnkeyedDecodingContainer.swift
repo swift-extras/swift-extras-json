@@ -5,13 +5,15 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     let array: [JSONValue]
 
     let count: Int? // protocol requirement to be optional
-    var isAtEnd = false
+    var isAtEnd: Bool
     var currentIndex = 0
 
     init(impl: JSONDecoderImpl, codingPath: [CodingKey], array: [JSONValue]) {
         self.impl = impl
         self.codingPath = codingPath
         self.array = array
+
+        isAtEnd = array.count == 0
         count = array.count
     }
 
