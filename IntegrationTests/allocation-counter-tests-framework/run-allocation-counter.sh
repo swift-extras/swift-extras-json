@@ -54,8 +54,8 @@ EOF
     cat <<EOF
     ],
     dependencies: [
-        .package(url: "HookedFunctions/", .branch("master")),
-        .package(url: "$swiftpm_pkg_name/", .branch("master")),
+        .package(url: "HookedFunctions/", .branch("main")),
+        .package(url: "$swiftpm_pkg_name/", .branch("main")),
 EOF
     if [[ -n "$extra_dependencies_file" ]]; then
         cat "$extra_dependencies_file"
