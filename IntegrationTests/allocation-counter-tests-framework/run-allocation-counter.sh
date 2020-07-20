@@ -24,6 +24,7 @@ function die() {
 
 function make_git_commit_all() {
     git init > /dev/null
+    git checkout -b main
     if [[ "$(git config user.email)" == "" ]]; then
         git config --local user.email does@really-not.matter
         git config --local user.name 'Does Not Matter'
