@@ -2,7 +2,7 @@
 
 [![Swift 5.1](https://img.shields.io/badge/Swift-5.1-blue.svg)](https://swift.org/download/)
 [![github-actions](https://github.com/fabianfett/pure-swift-json/workflows/CI/badge.svg)](https://github.com/fabianfett/pure-swift-json/actions)
-[![codecov](https://codecov.io/gh/fabianfett/pure-swift-json/branch/master/graph/badge.svg)](https://codecov.io/gh/fabianfett/pure-swift-json)
+[![codecov](https://codecov.io/gh/fabianfett/pure-swift-json/branch/main/graph/badge.svg)](https://codecov.io/gh/fabianfett/pure-swift-json)
 
 This package provides a json encoder and decoder in pure Swift (without the use of Foundation or any other dependency). 
 The implementation is [RFC8259](https://tools.ietf.org/html/rfc8259) compliant. It offers a significant performance improvement compared to the Foundation implementation on Linux.
@@ -25,7 +25,7 @@ If you like the idea of using pure Swift without any dependencies, you might als
 #### Alternatives
 
 - [IkigaJSON](https://github.com/autimatisering/IkigaJSON) super fast encoding and decoding especially for server side Swift code. Depends on `SwiftNIO`.
-- [Foundation Coding](https://github.com/apple/swift-corelibs-foundation/blob/master/Sources/Foundation/JSONEncoder.swift)
+- [Foundation Coding](https://github.com/apple/swift-corelibs-foundation/blob/main/Sources/Foundation/JSONEncoder.swift)
 
 ## Usage
 
@@ -245,7 +245,7 @@ struct MyEvent: Decodable {
 }
 ```
 
-Checkout a full example in the test file [DateCodingTests](https://github.com/fabianfett/pure-swift-json/blob/master/Tests/JSONCodingTests/DateCodingTests.swift).
+Checkout a full example in the test file [DateCodingTests](https://github.com/fabianfett/pure-swift-json/blob/main/Tests/PureSwiftJSONTests/DateCodingTests.swift).
 
 ### UTF-16 and UTF-32
 
@@ -278,3 +278,4 @@ Focus areas for the time being:
 - [@dinhhungle](https://github.com/dinhhungle) thanks for your quality assurance. It helped a lot! 
 - [@Ro-M](https://github.com/Ro-M) thanks for checking my README.md
 - [@Trzyipolkostkicukru](https://github.com/Trzyipolkostkicukru) thanks for your advice on `@propertyWrappers` and for finding typos.
+

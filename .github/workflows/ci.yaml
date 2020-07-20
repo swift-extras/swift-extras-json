@@ -2,7 +2,7 @@ name: CI
 on: 
   push:
     branches: 
-    - master
+    - main
   pull_request:
     branches: 
     - "*"
@@ -81,13 +81,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
       with:
-        fetch-depth: 1
+        fetch-depth: 5
     - name: Test
       run: ./run-tests.sh
       working-directory: ./IntegrationTests
 
   "macOS-Tests":
     runs-on: macOS-latest
+    strategy:
+      matrix:
+        xcode:
+        - Xcode_11.1.app
+        - Xcode_11.6.app
+        - Xcode_12.app
     steps:
     - name: Checkout
       uses: actions/checkout@v1
@@ -96,7 +102,7 @@ jobs:
     - name: Show all Xcode versions
       run: ls -an /Applications/ | grep Xcode*
     - name: Change Xcode command line tools
-      run: sudo xcode-select -s /Applications/Xcode_11.4.app/Contents/Developer
+      run: sudo xcode-select -s /Applications/${{ matrix.xcode }}/Contents/Developer
     - name: Swift version
       run: swift --version
     - name: Xcode Tests
@@ -108,11 +114,21 @@ jobs:
 
   "macOS-Performance-Tests":
     runs-on: macOS-latest
+    strategy:
+      matrix:
+        xcode:
+        - Xcode_11.1.app
+        - Xcode_11.6.app
+        - Xcode_12.app
     steps:
     - name: Checkout
       uses: actions/checkout@v1
       with:
         fetch-depth: 1
+    - name: Change Xcode command line tools
+      run: sudo xcode-select -s /Applications/${{ matrix.xcode }}/Contents/Developer
+    - name: Swift version
+      run: swift --version
     - name: Build
       run: swift build -c release
       working-directory: ./PerfTests
