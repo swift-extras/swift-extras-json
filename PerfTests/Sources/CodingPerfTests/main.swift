@@ -67,15 +67,15 @@ let sampleData = sampleString.data(using: .utf8)!
 
 let reading = timing(name: "PureSwift on [UInt8]         ") {
     for _ in 1 ... runs {
-        var reader = DocumentReader(bytes: sampleBytes)
-        while let _ = reader.read() {}
+        var iterator = sampleBytes.makeIterator()
+        while let _ = iterator.next() {}
     }
 }
 
 let readingFoundationData = timing(name: "PureSwift on Foundation.Data ") {
     for _ in 1 ... runs {
-        var reader = DocumentReader(bytes: sampleData)
-        while let _ = reader.read() {}
+        var iterator = sampleData.makeIterator()
+        while let _ = iterator.next() {}
     }
 }
 
@@ -83,8 +83,9 @@ let readingNIOByteBuffer = timing(name: "PureSwift on NIO.ByteBuffer  ") {
     for _ in 1 ... runs {
         var buffer = ByteBufferAllocator().buffer(capacity: sampleBytes.count)
         buffer.writeBytes(sampleBytes)
-        var reader = DocumentReader(bytes: buffer.readBytes(length: buffer.readableBytes)!)
-        while let _ = reader.read() {}
+
+        var iterator = buffer.readableBytesView.makeIterator()
+        while let _ = iterator.next() {}
     }
 }
 
