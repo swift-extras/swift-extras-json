@@ -1,12 +1,12 @@
 
-public struct DocumentReader {
+@usableFromInline struct DocumentReader {
     @usableFromInline let array: [UInt8]
     @usableFromInline let count: Int
 
     @usableFromInline /* private(set) */ var index: Int = -1
     @usableFromInline /* private(set) */ var value: UInt8?
 
-    @inlinable public init<Bytes: Collection>(bytes: Bytes) where Bytes.Element == UInt8 {
+    @inlinable init<Bytes: Collection>(bytes: Bytes) where Bytes.Element == UInt8 {
         if let array = bytes as? [UInt8] {
             self.array = array
         } else {
@@ -20,7 +20,7 @@ public struct DocumentReader {
         return array[bounds]
     }
 
-    @inlinable public mutating func read() -> (UInt8, Int)? {
+    @inlinable mutating func read() -> (UInt8, Int)? {
         guard index < count - 1 else {
             value = nil
             index = array.endIndex
