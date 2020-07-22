@@ -55,9 +55,7 @@ jobs:
       image: ${{ matrix.images }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
+      uses: actions/checkout@v2
     - name: Build
       run: swift build -c release
       working-directory: ./PerfTests
@@ -79,9 +77,7 @@ jobs:
       MAX_ALLOCS_ALLOWED_jsonvalue_to_bytes: 0
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-      with:
-        fetch-depth: 0
+      uses: actions/checkout@v2
     - name: Test
       run: ./run-tests.sh
       working-directory: ./IntegrationTests
@@ -96,9 +92,7 @@ jobs:
         - Xcode_12.app
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
+      uses: actions/checkout@v2
     - name: Show all Xcode versions
       run: ls -an /Applications/ | grep Xcode*
     - name: Change Xcode command line tools
@@ -122,9 +116,7 @@ jobs:
         - Xcode_12.app
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
+      uses: actions/checkout@v2
     - name: Change Xcode command line tools
       run: sudo xcode-select -s /Applications/${{ matrix.xcode }}/Contents/Developer
     - name: Swift version
