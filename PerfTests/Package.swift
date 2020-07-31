@@ -6,6 +6,7 @@ import PackageDescription
 var package = Package(
     name: "pure-swift-json-performance",
     products: [
+        .executable(name: "CodingPerfTests", targets: ["CodingPerfTests"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.13.0"),
