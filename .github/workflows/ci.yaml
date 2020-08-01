@@ -60,7 +60,7 @@ jobs:
       run: swift build -c release
       working-directory: ./PerfTests
     - name: Run test
-      run: .build/release/CodingPerfTests
+      run: swift run -c release
       working-directory: ./PerfTests
 
   "tuxOS-Integration-Tests":
@@ -125,5 +125,5 @@ jobs:
       run: swift build -c release
       working-directory: ./PerfTests
     - name: Run test
-      run: .build/release/CodingPerfTests
+      run: swift run -c release
       working-directory: ./PerfTests
