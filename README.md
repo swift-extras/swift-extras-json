@@ -129,11 +129,8 @@ by cloning this repo and
 # change dir to perf tests
 $ cd PerfTests
 
-# compile in release mode - IMPORTANT ‼️
-$ swift build -c release
-
-# run tests
-$ .build/release/PureSwiftJSONCodingPerfTests
+# compile and run in release mode - IMPORTANT ‼️
+$ swift run -c release
 ```
 
 #### Encoding
