@@ -13,7 +13,7 @@ If you like the idea of using pure Swift without any dependencies, you might als
 
 - [x] does not use Foundation at all
 - [x] does not use `unsafe` Swift syntax
-- [x] no external dependencies other than the Swift STL
+- [x] no external dependencies, only the Swift stdlib required
 - [x] faster than Foundation implementation
 
 #### Currently not supported
