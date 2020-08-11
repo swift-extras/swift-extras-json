@@ -49,7 +49,7 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         var container: UnkeyedDecodingContainer?
         XCTAssertNoThrow(container = try impl.unkeyedContainer())
         XCTAssertThrowsError(_ = try container?.decode(type.self)) { error in
-            guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
+            guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
                 return XCTFail("Unexpected error: \(error)")
             }
 
@@ -82,7 +82,7 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         var container: UnkeyedDecodingContainer?
         XCTAssertNoThrow(container = try impl.unkeyedContainer())
         XCTAssertThrowsError(_ = try container?.decode(type.self)) { error in
-            guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
+            guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
                 return XCTFail("Unexpected error: \(error)")
             }
 
@@ -104,7 +104,7 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
             var container = try impl.unkeyedContainer()
             let result = try container.decode(UInt8.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 1)
             guard let codingKey = context.codingPath.first else {
@@ -126,7 +126,7 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
             var container = try impl.unkeyedContainer()
             let result = try container.decode(UInt8.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 1)
             guard let codingKey = context.codingPath.first else {
@@ -148,7 +148,7 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
             var container = try impl.unkeyedContainer()
             let result = try container.decode(UInt8.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == UInt8.self)
             XCTAssertEqual(context.codingPath.count, 1)
@@ -351,7 +351,7 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
             var container = try impl.unkeyedContainer()
             let result = try container.decode(type.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 1)
             guard let codingKey = context.codingPath.first else {
@@ -372,7 +372,7 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         var container: UnkeyedDecodingContainer?
         XCTAssertNoThrow(container = try impl.unkeyedContainer())
         XCTAssertThrowsError(_ = try container?.decode(type.self)) { error in
-            guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
+            guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
                 return XCTFail("Unexpected error: \(error)")
             }
 

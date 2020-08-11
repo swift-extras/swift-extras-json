@@ -1,7 +1,7 @@
 import Foundation
 import PureSwiftJSON
 #if os(macOS)
-    import SwiftyJSON
+import SwiftyJSON
 #endif
 import IkigaJSON
 import NIO
@@ -119,11 +119,11 @@ let pureParsingBuffer = try timing(name: "PureSwift on NIO.ByteBuffer  ") {
 }
 
 #if os(macOS)
-    let swiftyJSONParsing = try timing(name: "SwiftyJSON                   ") {
-        for _ in 1 ... runs {
-            _ = try JSON(data: sampleData)
-        }
+let swiftyJSONParsing = try timing(name: "SwiftyJSON                   ") {
+    for _ in 1 ... runs {
+        _ = try JSON(data: sampleData)
     }
+}
 #endif
 
 print("------------------------------------------")

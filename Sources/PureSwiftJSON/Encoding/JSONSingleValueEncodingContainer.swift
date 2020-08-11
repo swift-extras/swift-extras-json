@@ -13,8 +13,8 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
     mutating func encodeNil() throws {}
 
     mutating func encode(_ value: Bool) throws {
-        preconditionCanEncodeNewValue()
-        impl.singleValue = .bool(value)
+        self.preconditionCanEncodeNewValue()
+        self.impl.singleValue = .bool(value)
     }
 
     mutating func encode(_ value: Int) throws {
@@ -60,7 +60,7 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
     mutating func encode(_ value: Float) throws {
         guard !value.isNaN, !value.isInfinite else {
             throw EncodingError.invalidValue(value, .init(
-                codingPath: codingPath,
+                codingPath: self.codingPath,
                 debugDescription: "Unable to encode Float.\(value) directly in JSON."
             ))
         }
@@ -71,7 +71,7 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
     mutating func encode(_ value: Double) throws {
         guard !value.isNaN, !value.isInfinite else {
             throw EncodingError.invalidValue(value, .init(
-                codingPath: codingPath,
+                codingPath: self.codingPath,
                 debugDescription: "Unable to encode Double.\(value) directly in JSON."
             ))
         }
@@ -80,29 +80,30 @@ struct JSONSingleValueEncodingContainer: SingleValueEncodingContainer {
     }
 
     mutating func encode(_ value: String) throws {
-        preconditionCanEncodeNewValue()
-        impl.singleValue = .string(value)
+        self.preconditionCanEncodeNewValue()
+        self.impl.singleValue = .string(value)
     }
 
     mutating func encode<T: Encodable>(_ value: T) throws {
-        preconditionCanEncodeNewValue()
-        try value.encode(to: impl)
+        self.preconditionCanEncodeNewValue()
+        try value.encode(to: self.impl)
     }
 
     func preconditionCanEncodeNewValue() {
-        precondition(impl.singleValue == nil, "Attempt to encode value through single value container when previously value already encoded.")
+        precondition(self.impl.singleValue == nil, "Attempt to encode value through single value container when previously value already encoded.")
     }
 }
 
 extension JSONSingleValueEncodingContainer {
     @inline(__always) private mutating func encodeFixedWidthInteger<N: FixedWidthInteger>(_ value: N) throws {
-        preconditionCanEncodeNewValue()
-        impl.singleValue = .number(value.description)
+        self.preconditionCanEncodeNewValue()
+        self.impl.singleValue = .number(value.description)
     }
 
     @inline(__always) private mutating func encodeFloatingPoint<N: FloatingPoint>(_ value: N)
-        throws where N: CustomStringConvertible {
-        preconditionCanEncodeNewValue()
-        impl.singleValue = .number(value.description)
+        throws where N: CustomStringConvertible
+    {
+        self.preconditionCanEncodeNewValue()
+        self.impl.singleValue = .number(value.description)
     }
 }

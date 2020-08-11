@@ -12,7 +12,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(DoubleBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Double, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Double, let context) {
             XCTAssert(value.isNaN) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "number")
@@ -26,7 +26,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(DoubleBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Double, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Double, let context) {
             XCTAssert(value.isInfinite) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "number")
@@ -45,7 +45,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(FloatBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Float, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Float, let context) {
             XCTAssert(value.isNaN) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "number")
@@ -59,7 +59,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(FloatBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Float, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Float, let context) {
             XCTAssert(value.isInfinite) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "number")
@@ -80,10 +80,10 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
             func encode(to encoder: Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 var nameContainer = container.nestedContainer(keyedBy: NameCodingKeys.self, forKey: .name)
-                try nameContainer.encode(firstName, forKey: .firstName)
+                try nameContainer.encode(self.firstName, forKey: .firstName)
 
                 var sameContainer = container.nestedContainer(keyedBy: NameCodingKeys.self, forKey: .name)
-                try sameContainer.encode(surname, forKey: .surname)
+                try sameContainer.encode(self.surname, forKey: .surname)
             }
 
             private enum CodingKeys: String, CodingKey {

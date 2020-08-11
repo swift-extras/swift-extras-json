@@ -49,7 +49,7 @@ class JSONSingleValueDecodingContainerTests: XCTestCase {
             let container = try impl.singleValueContainer()
             let result = try container.decode(String.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == String.self)
             XCTAssertEqual(context.codingPath.count, 0)
@@ -80,7 +80,7 @@ class JSONSingleValueDecodingContainerTests: XCTestCase {
             let container = try impl.singleValueContainer()
             let result = try container.decode(Bool.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == Bool.self)
             XCTAssertEqual(context.codingPath.count, 0)
@@ -100,7 +100,7 @@ class JSONSingleValueDecodingContainerTests: XCTestCase {
             let container = try impl.singleValueContainer()
             let result = try container.decode(UInt8.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 0)
             XCTAssertEqual(context.debugDescription, "Parsed JSON number <\(number)> does not fit in UInt8.")
@@ -117,7 +117,7 @@ class JSONSingleValueDecodingContainerTests: XCTestCase {
             let container = try impl.singleValueContainer()
             let result = try container.decode(UInt8.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 0)
             XCTAssertEqual(context.debugDescription, "Parsed JSON number <\(number)> does not fit in UInt8.")
@@ -134,7 +134,7 @@ class JSONSingleValueDecodingContainerTests: XCTestCase {
             let container = try impl.singleValueContainer()
             let result = try container.decode(UInt8.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == UInt8.self)
             XCTAssertEqual(context.codingPath.count, 0)
@@ -336,7 +336,7 @@ class JSONSingleValueDecodingContainerTests: XCTestCase {
             let container = try impl.singleValueContainer()
             let result = try container.decode(type.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 0)
             XCTAssertEqual(context.debugDescription, "Parsed JSON number <1000e1000> does not fit in Float.")
@@ -353,7 +353,7 @@ class JSONSingleValueDecodingContainerTests: XCTestCase {
             let container = try impl.singleValueContainer()
             let result = try container.decode(type.self)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == Float.self)
             XCTAssertEqual(context.codingPath.count, 0)

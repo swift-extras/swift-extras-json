@@ -1,7 +1,7 @@
 
 struct ArrayKey: CodingKey, Equatable {
     init(index: Int) {
-        intValue = index
+        self.intValue = index
     }
 
     init?(stringValue _: String) {
@@ -15,7 +15,7 @@ struct ArrayKey: CodingKey, Equatable {
     var intValue: Int?
 
     var stringValue: String {
-        return "Index \(intValue!)"
+        "Index \(self.intValue!)"
     }
 }
 
