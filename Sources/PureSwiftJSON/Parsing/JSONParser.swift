@@ -4,7 +4,8 @@ public struct JSONParser {
 
     @inlinable
     public func parse<Bytes: Collection>(bytes: Bytes) throws
-        -> JSONValue where Bytes.Element == UInt8 {
+        -> JSONValue where Bytes.Element == UInt8
+    {
         var impl = JSONParserImpl(bytes: bytes)
         return try impl.parse()
     }
@@ -15,17 +16,17 @@ public struct JSONParser {
     @usableFromInline var depth: Int = 0
 
     @inlinable init<Bytes: Collection>(bytes: Bytes) where Bytes.Element == UInt8 {
-        reader = DocumentReader(bytes: bytes)
+        self.reader = DocumentReader(bytes: bytes)
     }
 
     @usableFromInline mutating func parse() throws -> JSONValue {
         let value = try parseValue()
         #if DEBUG
-            defer {
-                guard self.depth == 0 else {
-                    preconditionFailure("Expected to end parsing with a depth of 0")
-                }
+        defer {
+            guard self.depth == 0 else {
+                preconditionFailure("Expected to end parsing with a depth of 0")
             }
+        }
         #endif
 
         // handle extra character if top level was number
@@ -60,7 +61,7 @@ public struct JSONParser {
         while let (byte, index) = reader.read() {
             switch byte {
             case UInt8(ascii: "\""):
-                return .string(try parseString())
+                return .string(try self.parseString())
             case UInt8(ascii: "{"):
                 let object = try parseObject()
                 return .object(object)
@@ -71,7 +72,7 @@ public struct JSONParser {
                 let bool = try parseBool()
                 return .bool(bool)
             case UInt8(ascii: "n"):
-                try parseNull()
+                try self.parseNull()
                 return .null
 
             case UInt8(ascii: "-"), UInt8(ascii: "0") ... UInt8(ascii: "9"):
@@ -90,46 +91,46 @@ public struct JSONParser {
     // MARK: - Parse Null -
 
     mutating func parseNull() throws {
-        guard reader.read()?.0 == UInt8(ascii: "u"),
-            reader.read()?.0 == UInt8(ascii: "l"),
-            reader.read()?.0 == UInt8(ascii: "l")
+        guard self.reader.read()?.0 == UInt8(ascii: "u"),
+            self.reader.read()?.0 == UInt8(ascii: "l"),
+            self.reader.read()?.0 == UInt8(ascii: "l")
         else {
             guard let value = reader.value else {
                 throw JSONError.unexpectedEndOfFile
             }
 
-            throw JSONError.unexpectedCharacter(ascii: value, characterIndex: reader.index)
+            throw JSONError.unexpectedCharacter(ascii: value, characterIndex: self.reader.index)
         }
     }
 
     // MARK: - Parse Bool -
 
     mutating func parseBool() throws -> Bool {
-        switch reader.value {
+        switch self.reader.value {
         case UInt8(ascii: "t"):
-            guard reader.read()?.0 == UInt8(ascii: "r"),
-                reader.read()?.0 == UInt8(ascii: "u"),
-                reader.read()?.0 == UInt8(ascii: "e")
+            guard self.reader.read()?.0 == UInt8(ascii: "r"),
+                self.reader.read()?.0 == UInt8(ascii: "u"),
+                self.reader.read()?.0 == UInt8(ascii: "e")
             else {
                 guard let value = reader.value else {
                     throw JSONError.unexpectedEndOfFile
                 }
 
-                throw JSONError.unexpectedCharacter(ascii: value, characterIndex: reader.index)
+                throw JSONError.unexpectedCharacter(ascii: value, characterIndex: self.reader.index)
             }
 
             return true
         case UInt8(ascii: "f"):
-            guard reader.read()?.0 == UInt8(ascii: "a"),
-                reader.read()?.0 == UInt8(ascii: "l"),
-                reader.read()?.0 == UInt8(ascii: "s"),
-                reader.read()?.0 == UInt8(ascii: "e")
+            guard self.reader.read()?.0 == UInt8(ascii: "a"),
+                self.reader.read()?.0 == UInt8(ascii: "l"),
+                self.reader.read()?.0 == UInt8(ascii: "s"),
+                self.reader.read()?.0 == UInt8(ascii: "e")
             else {
                 guard let value = reader.value else {
                     throw JSONError.unexpectedEndOfFile
                 }
 
-                throw JSONError.unexpectedCharacter(ascii: value, characterIndex: reader.index)
+                throw JSONError.unexpectedCharacter(ascii: value, characterIndex: self.reader.index)
             }
 
             return false
@@ -141,7 +142,7 @@ public struct JSONParser {
     // MARK: - Parse String -
 
     mutating func parseString() throws -> String {
-        return try reader.readUTF8StringTillNextUnescapedQuote()
+        try self.reader.readUTF8StringTillNextUnescapedQuote()
     }
 
     // MARK: - Parse Number -
@@ -160,8 +161,8 @@ public struct JSONParser {
 
         // parse first character
 
-        let stringStartIndex = reader.index
-        switch reader.value! {
+        let stringStartIndex = self.reader.index
+        switch self.reader.value! {
         case UInt8(ascii: "0"):
             numbersSinceControlChar = 1
             pastControlChar = .operand
@@ -227,13 +228,13 @@ public struct JSONParser {
                     throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
                 }
 
-                return reader.makeStringFast(reader[stringStartIndex ..< index])
+                return self.reader.makeStringFast(self.reader[stringStartIndex ..< index])
             case UInt8(ascii: ","), UInt8(ascii: "]"), UInt8(ascii: "}"):
                 guard numbersSinceControlChar > 0 else {
                     throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
                 }
 
-                return reader.makeStringFast(reader[stringStartIndex ..< index])
+                return self.reader.makeStringFast(self.reader[stringStartIndex ..< index])
             default:
                 throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
             }
@@ -243,7 +244,7 @@ public struct JSONParser {
             throw JSONError.unexpectedEndOfFile
         }
 
-        return String(decoding: reader.remainingBytes(from: stringStartIndex), as: Unicode.UTF8.self)
+        return String(decoding: self.reader.remainingBytes(from: stringStartIndex), as: Unicode.UTF8.self)
     }
 
     // MARK: - Parse Array -
@@ -255,11 +256,11 @@ public struct JSONParser {
     }
 
     mutating func parseArray() throws -> [JSONValue] {
-        assert(reader.value == UInt8(ascii: "["))
-        guard depth < 512 else {
-            throw JSONError.tooManyNestedArraysOrDictionaries(characterIndex: reader.index)
+        assert(self.reader.value == UInt8(ascii: "["))
+        guard self.depth < 512 else {
+            throw JSONError.tooManyNestedArraysOrDictionaries(characterIndex: self.reader.index)
         }
-        depth += 1
+        self.depth += 1
         defer { depth -= 1 }
         var state = ArrayState.expectValueOrEnd
 
@@ -339,7 +340,7 @@ public struct JSONParser {
                 case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
                     state = .expectSeperatorOrEnd
                 default:
-                    throw JSONError.unexpectedCharacter(ascii: extraByte, characterIndex: reader.index)
+                    throw JSONError.unexpectedCharacter(ascii: extraByte, characterIndex: self.reader.index)
                 }
             case .expectValueOrEnd:
                 preconditionFailure("this state should not be reachable at this point")
@@ -358,11 +359,11 @@ public struct JSONParser {
     }
 
     mutating func parseObject() throws -> [String: JSONValue] {
-        assert(reader.value == UInt8(ascii: "{"))
-        guard depth < 512 else {
-            throw JSONError.tooManyNestedArraysOrDictionaries(characterIndex: reader.index)
+        assert(self.reader.value == UInt8(ascii: "{"))
+        guard self.depth < 512 else {
+            throw JSONError.tooManyNestedArraysOrDictionaries(characterIndex: self.reader.index)
         }
-        depth += 1
+        self.depth += 1
         defer { depth -= 1 }
 
         var state = ObjectState.expectKeyOrEnd
@@ -373,7 +374,7 @@ public struct JSONParser {
             case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
                 continue
             case UInt8(ascii: "\""):
-                state = .expectColon(key: try parseString())
+                state = .expectColon(key: try self.parseString())
                 break loop
             case UInt8(ascii: "}"):
                 return [:]
@@ -409,7 +410,7 @@ public struct JSONParser {
                     throw JSONError.unexpectedEndOfFile
                 }
 
-            case let .expectColon(key):
+            case .expectColon(let key):
                 colonloop: while let (byte, index) = reader.read() {
                     switch byte {
                     case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
@@ -426,7 +427,7 @@ public struct JSONParser {
                     throw JSONError.unexpectedEndOfFile
                 }
 
-            case let .expectValue(key):
+            case .expectValue(let key):
                 let value = try parseValue()
                 object[key] = value
 
@@ -448,7 +449,7 @@ public struct JSONParser {
                 case UInt8(ascii: " "), UInt8(ascii: "\r"), UInt8(ascii: "\n"), UInt8(ascii: "\t"):
                     state = .expectSeperatorOrEnd
                 default:
-                    throw JSONError.unexpectedCharacter(ascii: extraByte, characterIndex: reader.index)
+                    throw JSONError.unexpectedCharacter(ascii: extraByte, characterIndex: self.reader.index)
                 }
 
             case .expectSeperatorOrEnd:

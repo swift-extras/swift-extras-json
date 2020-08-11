@@ -27,6 +27,6 @@ var package = Package(
 )
 
 #if os(macOS)
-    package.dependencies.append(.package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"))
-    package.targets.last?.dependencies.append("SwiftyJSON")
+package.dependencies.append(.package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.0"))
+package.targets.last?.dependencies.append("SwiftyJSON")
 #endif

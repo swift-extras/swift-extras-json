@@ -15,9 +15,9 @@
 import AtomicCounter
 import Foundation
 #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-    import Darwin
+import Darwin
 #else
-    import Glibc
+import Glibc
 #endif
 
 func measureAll(_ fn: () -> Int) -> [[String: Int]] {
@@ -26,11 +26,11 @@ func measureAll(_ fn: () -> Int) -> [[String: Int]] {
         AtomicCounter.reset_malloc_counter()
         AtomicCounter.reset_malloc_bytes_counter()
         #if os(macOS) || os(iOS) || os(watchOS) || os(tvOS)
-            autoreleasepool {
-                _ = fn()
-            }
-        #else
+        autoreleasepool {
             _ = fn()
+        }
+        #else
+        _ = fn()
         #endif
         usleep(100_000) // allocs/frees happen on multiple threads, allow some cool down time
         let frees = AtomicCounter.read_free_counter()

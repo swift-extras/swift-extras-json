@@ -36,11 +36,11 @@ extension JSONValue {
             bytes.append(contentsOf: [
                 UInt8(ascii: "f"), UInt8(ascii: "a"), UInt8(ascii: "l"), UInt8(ascii: "s"), UInt8(ascii: "e"),
             ])
-        case let .string(string):
-            encodeString(string, to: &bytes)
-        case let .number(string):
+        case .string(let string):
+            self.encodeString(string, to: &bytes)
+        case .number(let string):
             bytes.append(contentsOf: string.utf8)
-        case let .array(array):
+        case .array(let array):
             var iterator = array.makeIterator()
             bytes.append(UInt8(ascii: "["))
             // we don't kine branching, this is why we have this extra
@@ -52,17 +52,17 @@ extension JSONValue {
                 item.appendBytes(to: &bytes)
             }
             bytes.append(UInt8(ascii: "]"))
-        case let .object(dict):
+        case .object(let dict):
             var iterator = dict.makeIterator()
             bytes.append(UInt8(ascii: "{"))
             if let (key, value) = iterator.next() {
-                encodeString(key, to: &bytes)
+                self.encodeString(key, to: &bytes)
                 bytes.append(UInt8(ascii: ":"))
                 value.appendBytes(to: &bytes)
             }
             while let (key, value) = iterator.next() {
                 bytes.append(UInt8(ascii: ","))
-                encodeString(key, to: &bytes)
+                self.encodeString(key, to: &bytes)
                 bytes.append(UInt8(ascii: ":"))
                 value.appendBytes(to: &bytes)
             }
@@ -132,13 +132,13 @@ public func == (lhs: JSONValue, rhs: JSONValue) -> Bool {
     switch (lhs, rhs) {
     case (.null, .null):
         return true
-    case let (.bool(lhs), .bool(rhs)):
+    case (.bool(let lhs), .bool(let rhs)):
         return lhs == rhs
-    case let (.number(lhs), .number(rhs)):
+    case (.number(let lhs), .number(let rhs)):
         return lhs == rhs
-    case let (.string(lhs), .string(rhs)):
+    case (.string(let lhs), .string(let rhs)):
         return lhs == rhs
-    case let (.array(lhs), .array(rhs)):
+    case (.array(let lhs), .array(let rhs)):
         guard lhs.count == rhs.count else {
             return false
         }
@@ -154,7 +154,7 @@ public func == (lhs: JSONValue, rhs: JSONValue) -> Bool {
         }
 
         return true
-    case let (.object(lhs), .object(rhs)):
+    case (.object(let lhs), .object(let rhs)):
         guard lhs.count == rhs.count else {
             return false
         }

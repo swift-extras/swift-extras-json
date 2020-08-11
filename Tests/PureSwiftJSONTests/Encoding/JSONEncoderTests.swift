@@ -50,7 +50,7 @@ class JSONEncoderTests: XCTestCase {
 
     func testEncodeDoubleNAN() {
         XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Double.nan)) { error in
-            guard case let Swift.EncodingError.invalidValue(value as Double, context) = error else {
+            guard case Swift.EncodingError.invalidValue(let value as Double, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
 
@@ -62,7 +62,7 @@ class JSONEncoderTests: XCTestCase {
 
     func testEncodeDoubleInf() {
         XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Double.infinity)) { error in
-            guard case let Swift.EncodingError.invalidValue(value as Double, context) = error else {
+            guard case Swift.EncodingError.invalidValue(let value as Double, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
 
@@ -74,7 +74,7 @@ class JSONEncoderTests: XCTestCase {
 
     func testEncodeFloatNAN() {
         XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Float.nan)) { error in
-            guard case let Swift.EncodingError.invalidValue(value as Float, context) = error else {
+            guard case Swift.EncodingError.invalidValue(let value as Float, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
 
@@ -86,7 +86,7 @@ class JSONEncoderTests: XCTestCase {
 
     func testEncodeFloatInf() {
         XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Float.infinity)) { error in
-            guard case let Swift.EncodingError.invalidValue(value as Float, context) = error else {
+            guard case Swift.EncodingError.invalidValue(let value as Float, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
 
@@ -110,7 +110,7 @@ class JSONEncoderTests: XCTestCase {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 if let key = encoder.codingPath.last {
                     try container.encode(key.stringValue, forKey: .key)
-                    try container.encode(value, forKey: .value)
+                    try container.encode(self.value, forKey: .value)
                 }
             }
 

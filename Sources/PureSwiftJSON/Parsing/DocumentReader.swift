@@ -10,31 +10,31 @@
         if let array = bytes as? [UInt8] {
             self.array = array
         } else {
-            array = Array(bytes)
+            self.array = Array(bytes)
         }
 
-        count = array.count
+        self.count = self.array.count
     }
 
     @inlinable subscript(bounds: Range<Int>) -> ArraySlice<UInt8> {
-        return array[bounds]
+        self.array[bounds]
     }
 
     @inlinable mutating func read() -> (UInt8, Int)? {
-        guard index < count - 1 else {
-            value = nil
-            index = array.endIndex
+        guard self.index < self.count - 1 else {
+            self.value = nil
+            self.index = self.array.endIndex
             return nil
         }
 
-        index += 1
-        value = array[index]
+        self.index += 1
+        self.value = self.array[self.index]
 
-        return (value!, index)
+        return (self.value!, self.index)
     }
 
     @inlinable func remainingBytes(from index: Int) -> ArraySlice<UInt8> {
-        return array.suffix(from: index)
+        self.array.suffix(from: index)
     }
 
     @usableFromInline enum EscapedSequenceError: Swift.Error {
@@ -44,8 +44,8 @@
     }
 
     @inlinable mutating func readUTF8StringTillNextUnescapedQuote() throws -> String {
-        precondition(value == UInt8(ascii: "\""), "Expected to have read a quote character last")
-        var stringStartIndex = index + 1
+        precondition(self.value == UInt8(ascii: "\""), "Expected to have read a quote character last")
+        var stringStartIndex = self.index + 1
         var output: String?
 
         while let (byte, index) = read() {
@@ -53,10 +53,10 @@
             case UInt8(ascii: "\""):
                 guard var result = output else {
                     // if we don't have an output string we create a new string
-                    return makeStringFast(array[stringStartIndex ..< index])
+                    return self.makeStringFast(self.array[stringStartIndex ..< index])
                 }
                 // if we have an output string we append
-                result += makeStringFast(array[stringStartIndex ..< index])
+                result += self.makeStringFast(self.array[stringStartIndex ..< index])
                 return result
 
             case 0 ... 31:
@@ -65,27 +65,27 @@
                 // quotation mark, reverse solidus, and the control characters (U+0000
                 // through U+001F).
                 var string = output ?? ""
-                string += makeStringFast(array[stringStartIndex ... index])
+                string += self.makeStringFast(self.array[stringStartIndex ... index])
                 throw JSONError.unescapedControlCharacterInString(ascii: byte, in: string, index: index)
 
             case UInt8(ascii: "\\"):
                 if output != nil {
-                    output! += makeStringFast(array[stringStartIndex ..< index])
+                    output! += self.makeStringFast(self.array[stringStartIndex ..< index])
                 } else {
-                    output = makeStringFast(array[stringStartIndex ..< index])
+                    output = self.makeStringFast(self.array[stringStartIndex ..< index])
                 }
 
                 do {
                     let (escaped, newIndex) = try parseEscapeSequence()
                     output! += escaped
                     stringStartIndex = newIndex + 1
-                } catch let EscapedSequenceError.unexpectedEscapedCharacter(ascii, failureIndex) {
+                } catch EscapedSequenceError.unexpectedEscapedCharacter(let ascii, let failureIndex) {
                     output! += makeStringFast(array[index ... self.index])
                     throw JSONError.unexpectedEscapedCharacter(ascii: ascii, in: output!, index: failureIndex)
-                } catch let EscapedSequenceError.expectedLowSurrogateUTF8SequenceAfterHighSurrogate(failureIndex) {
+                } catch EscapedSequenceError.expectedLowSurrogateUTF8SequenceAfterHighSurrogate(let failureIndex) {
                     output! += makeStringFast(array[index ... self.index])
                     throw JSONError.expectedLowSurrogateUTF8SequenceAfterHighSurrogate(in: output!, index: failureIndex)
-                } catch let EscapedSequenceError.couldNotCreateUnicodeScalarFromUInt32(failureIndex, unicodeScalarValue) {
+                } catch EscapedSequenceError.couldNotCreateUnicodeScalarFromUInt32(let failureIndex, let unicodeScalarValue) {
                     output! += makeStringFast(array[index ... self.index])
                     throw JSONError.couldNotCreateUnicodeScalarFromUInt32(
                         in: output!, index: failureIndex, unicodeScalarValue: unicodeScalarValue
@@ -143,12 +143,13 @@
             // if we have a high surrogate we expect a low surrogate next
             let highSurrogateBitPattern = bitPattern
             guard let (escapeChar, _) = read(),
-                let (uChar, _) = read() else {
+                let (uChar, _) = read()
+            else {
                 throw JSONError.unexpectedEndOfFile
             }
 
             guard escapeChar == UInt8(ascii: #"\"#), uChar == UInt8(ascii: "u") else {
-                throw EscapedSequenceError.expectedLowSurrogateUTF8SequenceAfterHighSurrogate(index: index)
+                throw EscapedSequenceError.expectedLowSurrogateUTF8SequenceAfterHighSurrogate(index: self.index)
             }
 
             let lowSurrogateBitBattern = try parseUnicodeHexSequence()
@@ -156,7 +157,7 @@
             guard isSecondByteLowSurrogate == 0xDC00 else {
                 // we are in an escaped sequence. for this reason an output string must have
                 // been initialized
-                throw EscapedSequenceError.expectedLowSurrogateUTF8SequenceAfterHighSurrogate(index: index)
+                throw EscapedSequenceError.expectedLowSurrogateUTF8SequenceAfterHighSurrogate(index: self.index)
             }
 
             let highValue = UInt32(highSurrogateBitPattern - 0xD800) * 0x400
@@ -164,18 +165,18 @@
             let unicodeValue = highValue + lowValue + 0x10000
             guard let unicode = Unicode.Scalar(unicodeValue) else {
                 throw EscapedSequenceError.couldNotCreateUnicodeScalarFromUInt32(
-                    index: index, unicodeScalarValue: unicodeValue
+                    index: self.index, unicodeScalarValue: unicodeValue
                 )
             }
-            return (unicode, index)
+            return (unicode, self.index)
         }
 
         guard let unicode = Unicode.Scalar(bitPattern) else {
             throw EscapedSequenceError.couldNotCreateUnicodeScalarFromUInt32(
-                index: index, unicodeScalarValue: UInt32(bitPattern)
+                index: self.index, unicodeScalarValue: UInt32(bitPattern)
             )
         }
-        return (unicode, index)
+        return (unicode, self.index)
     }
 
     @inlinable mutating func parseUnicodeHexSequence() throws -> UInt16 {

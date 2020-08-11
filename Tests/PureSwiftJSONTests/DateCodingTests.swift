@@ -18,12 +18,12 @@ class DateCodingTests: XCTestCase {
                 throw DecodingError.dataCorruptedError(in: container, debugDescription:
                     "Expected date to be in format `\(dateFormat)`, but `\(dateString) does not forfill format`")
             }
-            wrappedValue = date
+            self.wrappedValue = date
         }
 
         func encode(to encoder: Encoder) throws {
             var container = encoder.singleValueContainer()
-            let dateString = Self.dateFormatter.string(from: wrappedValue)
+            let dateString = Self.dateFormatter.string(from: self.wrappedValue)
             try container.encode(dateString)
         }
 
