@@ -9,7 +9,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
         func encode(to encoder: Encoder) throws {
             var container = encoder.unkeyedContainer()
-            try container.encode(number)
+            try container.encode(self.number)
         }
     }
 
@@ -17,7 +17,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(DoubleInArrayBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Double, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Double, let context) {
             XCTAssert(value.isNaN) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
@@ -31,7 +31,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(DoubleInArrayBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Double, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Double, let context) {
             XCTAssert(value.isInfinite) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
@@ -47,7 +47,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
 
         func encode(to encoder: Encoder) throws {
             var container = encoder.unkeyedContainer()
-            try container.encode(number)
+            try container.encode(self.number)
         }
     }
 
@@ -55,7 +55,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(FloatInArrayBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Float, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Float, let context) {
             XCTAssert(value.isNaN) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
@@ -69,7 +69,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
         do {
             let result = try PSJSONEncoder().encode(FloatInArrayBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
-        } catch let Swift.EncodingError.invalidValue(value as Float, context) {
+        } catch Swift.EncodingError.invalidValue(let value as Float, let context) {
             XCTAssert(value.isInfinite) // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first?.stringValue, "Index 0")
@@ -90,8 +90,8 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
             func encode(to encoder: Encoder) throws {
                 var container = encoder.unkeyedContainer()
                 var nestedContainer = container.nestedContainer(keyedBy: NameCodingKeys.self)
-                try nestedContainer.encode(firstName, forKey: .firstName)
-                try nestedContainer.encode(surname, forKey: .surname)
+                try nestedContainer.encode(self.firstName, forKey: .firstName)
+                try nestedContainer.encode(self.surname, forKey: .surname)
             }
 
             private enum NameCodingKeys: String, CodingKey {
@@ -118,7 +118,7 @@ class JSONUnkeyedEncodingContainerTests: XCTestCase {
             func encode(to encoder: Encoder) throws {
                 var container = encoder.unkeyedContainer()
                 var numbersContainer = container.nestedUnkeyedContainer()
-                try numbers.forEach { try numbersContainer.encode($0) }
+                try self.numbers.forEach { try numbersContainer.encode($0) }
             }
 
             private enum CodingKeys: String, CodingKey {

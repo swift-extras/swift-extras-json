@@ -14,7 +14,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"{"hello":"world"}"#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == [Any].self)
             print(context)
@@ -39,7 +39,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"["haha", "hihi"]"#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == [String: Any].self)
             print(context)
@@ -49,31 +49,31 @@ class FoundationJSONDecoderTests: XCTestCase {
     }
 
     #if canImport(Darwin)
-        // this works only on Darwin, on Linux an error is thrown.
-        func testGetKeyedContainerFromSingleValuePayload() {
-            struct HelloWorld: Decodable {
-                enum CodingKeys: String, CodingKey {
-                    case hello
-                }
-
-                init(from decoder: Decoder) throws {
-                    _ = try decoder.container(keyedBy: CodingKeys.self)
-                    XCTFail("Did not expect to reach this point")
-                }
+    // this works only on Darwin, on Linux an error is thrown.
+    func testGetKeyedContainerFromSingleValuePayload() {
+        struct HelloWorld: Decodable {
+            enum CodingKeys: String, CodingKey {
+                case hello
             }
 
-            do {
-                let json = #""haha""#
-                let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
-                XCTFail("Did not expect to get a result: \(result)")
-            } catch let Swift.DecodingError.typeMismatch(type, context) {
-                // expected
-                XCTAssertTrue(type == [String: Any].self)
-                print(context)
-            } catch {
-                XCTFail("Unexpected error: \(error)")
+            init(from decoder: Decoder) throws {
+                _ = try decoder.container(keyedBy: CodingKeys.self)
+                XCTFail("Did not expect to reach this point")
             }
         }
+
+        do {
+            let json = #""haha""#
+            let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
+            XCTFail("Did not expect to get a result: \(result)")
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
+            // expected
+            XCTAssertTrue(type == [String: Any].self)
+            print(context)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
     #endif
 
     func testDecodeStringFromNumberInKeyedContainer() {
@@ -93,7 +93,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"{"hello": 12}"#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.typeMismatch(type, context) {
+        } catch Swift.DecodingError.typeMismatch(let type, let context) {
             // expected
             XCTAssertTrue(type == String.self)
             print(context)
@@ -119,7 +119,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = "{}"
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.keyNotFound(codingKey, context) {
+        } catch Swift.DecodingError.keyNotFound(let codingKey, let context) {
             // expected
             XCTAssertEqual(codingKey as? HelloWorld.CodingKeys, .hello)
             XCTAssertEqual(context.debugDescription, "No value associated with key CodingKeys(stringValue: \"hello\", intValue: nil) (\"hello\").")
@@ -153,7 +153,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"{"hello": {}}"#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.keyNotFound(codingKey, context) {
+        } catch Swift.DecodingError.keyNotFound(let codingKey, let context) {
             // expected
             XCTAssertEqual(codingKey as? HelloWorld.SubCodingKeys, .world)
             XCTAssertEqual(context.debugDescription, "No value associated with key SubCodingKeys(stringValue: \"world\", intValue: nil) (\"world\").")
@@ -182,7 +182,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"{"hello": \#(number)}"#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first as? HelloWorld.CodingKeys, .hello)
@@ -211,7 +211,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"{"hello": \#(number)}"#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 1)
             XCTAssertEqual(context.codingPath.first as? HelloWorld.CodingKeys, .hello)
@@ -236,7 +236,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"{"hello👩‍👩‍👧‍👧" 123 }"#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 0)
             print(context)
@@ -260,7 +260,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             let json = #"{"hello👩‍👩‍👧‍👧" "#
             let result = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)
             XCTFail("Did not expect to get a result: \(result)")
-        } catch let Swift.DecodingError.dataCorrupted(context) {
+        } catch Swift.DecodingError.dataCorrupted(let context) {
             // expected
             XCTAssertEqual(context.codingPath.count, 0)
             print(context)

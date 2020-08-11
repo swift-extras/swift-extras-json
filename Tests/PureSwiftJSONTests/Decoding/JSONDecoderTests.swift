@@ -55,7 +55,7 @@ class JSONDecoderTests: XCTestCase {
         let json = #"{"hello":"world"}"#
         XCTAssertThrowsError(_ = try PSJSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
             error in
-            guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
+            guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
 
@@ -79,7 +79,7 @@ class JSONDecoderTests: XCTestCase {
         let json = #"["haha", "hihi"]"#
         XCTAssertThrowsError(_ = try PSJSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
             error in
-            guard case let Swift.DecodingError.typeMismatch(type, context) = error else {
+            guard case Swift.DecodingError.typeMismatch(let type, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
 
@@ -102,7 +102,7 @@ class JSONDecoderTests: XCTestCase {
         let json = #"{"hello👩‍👩‍👧‍👧" 123 }"#
         XCTAssertThrowsError(_ = try PSJSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) {
             error in
-            guard case let Swift.DecodingError.dataCorrupted(context) = error else {
+            guard case Swift.DecodingError.dataCorrupted(let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
 

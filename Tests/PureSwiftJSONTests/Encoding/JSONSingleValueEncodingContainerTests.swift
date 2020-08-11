@@ -13,7 +13,7 @@ class JSONSingleValueEncodingContainerTests: XCTestCase {
 
             func encode(to encoder: Encoder) throws {
                 var container = encoder.singleValueContainer()
-                try container.encode(name)
+                try container.encode(self.name)
             }
         }
 

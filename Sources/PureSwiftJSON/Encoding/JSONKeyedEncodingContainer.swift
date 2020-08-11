@@ -10,7 +10,7 @@ struct JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
 
     init(impl: JSONEncoderImpl, codingPath: [CodingKey]) {
         self.impl = impl
-        object = impl.object!
+        self.object = impl.object!
         self.codingPath = codingPath
     }
 
@@ -24,17 +24,17 @@ struct JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
     mutating func encodeNil(forKey _: Self.Key) throws {}
 
     mutating func encode(_ value: Bool, forKey key: Self.Key) throws {
-        object.set(.bool(value), for: key.stringValue)
+        self.object.set(.bool(value), for: key.stringValue)
     }
 
     mutating func encode(_ value: String, forKey key: Self.Key) throws {
-        object.set(.string(value), for: key.stringValue)
+        self.object.set(.string(value), for: key.stringValue)
     }
 
     mutating func encode(_ value: Double, forKey key: Self.Key) throws {
         guard !value.isNaN, !value.isInfinite else {
             throw EncodingError.invalidValue(value, .init(
-                codingPath: codingPath + [key],
+                codingPath: self.codingPath + [key],
                 debugDescription: "Unable to encode Double.\(value) directly in JSON."
             ))
         }
@@ -45,7 +45,7 @@ struct JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
     mutating func encode(_ value: Float, forKey key: Self.Key) throws {
         guard !value.isNaN, !value.isInfinite else {
             throw EncodingError.invalidValue(value, .init(
-                codingPath: codingPath + [key],
+                codingPath: self.codingPath + [key],
                 debugDescription: "Unable to encode Float.\(value) directly in JSON."
             ))
         }
@@ -94,7 +94,7 @@ struct JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
     }
 
     mutating func encode<T>(_ value: T, forKey key: Self.Key) throws where T: Encodable {
-        let newPath = impl.codingPath + [key]
+        let newPath = self.impl.codingPath + [key]
         let newEncoder = JSONEncoderImpl(userInfo: impl.userInfo, codingPath: newPath)
         try value.encode(to: newEncoder)
 
@@ -102,40 +102,42 @@ struct JSONKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtocol 
             preconditionFailure()
         }
 
-        object.set(value, for: key.stringValue)
+        self.object.set(value, for: key.stringValue)
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type, forKey key: Self.Key) ->
-        KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
-        let newPath = impl.codingPath + [key]
+        KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey
+    {
+        let newPath = self.impl.codingPath + [key]
         let object = self.object.setObject(for: key.stringValue)
         let nestedContainer = JSONKeyedEncodingContainer<NestedKey>(impl: impl, object: object, codingPath: newPath)
         return KeyedEncodingContainer(nestedContainer)
     }
 
     mutating func nestedUnkeyedContainer(forKey key: Self.Key) -> UnkeyedEncodingContainer {
-        let newPath = impl.codingPath + [key]
-        let array = object.setArray(for: key.stringValue)
+        let newPath = self.impl.codingPath + [key]
+        let array = self.object.setArray(for: key.stringValue)
         let nestedContainer = JSONUnkeyedEncodingContainer(impl: impl, array: array, codingPath: newPath)
         return nestedContainer
     }
 
     mutating func superEncoder() -> Encoder {
-        return impl
+        self.impl
     }
 
     mutating func superEncoder(forKey _: Self.Key) -> Encoder {
-        return impl
+        self.impl
     }
 }
 
 extension JSONKeyedEncodingContainer {
     @inline(__always) private mutating func encodeFixedWidthInteger<N: FixedWidthInteger>(_ value: N, key: Self.Key) throws {
-        object.set(.number(value.description), for: key.stringValue)
+        self.object.set(.number(value.description), for: key.stringValue)
     }
 
     @inline(__always) private mutating func encodeFloatingPoint<N: FloatingPoint>(_ value: N, key: Self.Key)
-        throws where N: CustomStringConvertible {
-        object.set(.number(value.description), for: key.stringValue)
+        throws where N: CustomStringConvertible
+    {
+        self.object.set(.number(value.description), for: key.stringValue)
     }
 }

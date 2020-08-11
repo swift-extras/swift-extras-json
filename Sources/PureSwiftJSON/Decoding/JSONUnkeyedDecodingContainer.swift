@@ -13,12 +13,12 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         self.codingPath = codingPath
         self.array = array
 
-        isAtEnd = array.count == 0
-        count = array.count
+        self.isAtEnd = array.count == 0
+        self.count = array.count
     }
 
     mutating func decodeNil() throws -> Bool {
-        if array[currentIndex] == .null {
+        if self.array[self.currentIndex] == .null {
             defer {
                 currentIndex += 1
                 if currentIndex == count {
@@ -41,8 +41,8 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             }
         }
 
-        guard case let .bool(bool) = array[currentIndex] else {
-            throw createTypeMismatchError(type: type, value: array[currentIndex])
+        guard case .bool(let bool) = self.array[self.currentIndex] else {
+            throw createTypeMismatchError(type: type, value: self.array[self.currentIndex])
         }
 
         return bool
@@ -56,59 +56,59 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             }
         }
 
-        guard case let .string(string) = array[currentIndex] else {
-            throw createTypeMismatchError(type: type, value: array[currentIndex])
+        guard case .string(let string) = self.array[self.currentIndex] else {
+            throw createTypeMismatchError(type: type, value: self.array[self.currentIndex])
         }
 
         return string
     }
 
     mutating func decode(_: Double.Type) throws -> Double {
-        return try decodeLosslessStringConvertible()
+        try decodeLosslessStringConvertible()
     }
 
     mutating func decode(_: Float.Type) throws -> Float {
-        return try decodeLosslessStringConvertible()
+        try decodeLosslessStringConvertible()
     }
 
     mutating func decode(_: Int.Type) throws -> Int {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: Int8.Type) throws -> Int8 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: Int16.Type) throws -> Int16 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: Int32.Type) throws -> Int32 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: Int64.Type) throws -> Int64 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: UInt.Type) throws -> UInt {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: UInt8.Type) throws -> UInt8 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: UInt16.Type) throws -> UInt16 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: UInt32.Type) throws -> UInt32 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode(_: UInt64.Type) throws -> UInt64 {
-        return try decodeFixedWidthInteger()
+        try decodeFixedWidthInteger()
     }
 
     mutating func decode<T>(_: T.Type) throws -> T where T: Decodable {
@@ -117,7 +117,8 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws
-        -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey {
+        -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey
+    {
         let decoder = try decoderForNextElement()
         return try decoder.container(keyedBy: type)
     }
@@ -128,7 +129,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     mutating func superDecoder() throws -> Decoder {
-        return impl
+        self.impl
     }
 }
 
@@ -141,27 +142,25 @@ extension JSONUnkeyedDecodingContainer {
             }
         }
 
-        let value = array[currentIndex]
-        var newPath = codingPath
-        newPath.append(ArrayKey(index: currentIndex))
+        let value = self.array[self.currentIndex]
+        var newPath = self.codingPath
+        newPath.append(ArrayKey(index: self.currentIndex))
 
         return JSONDecoderImpl(
-            userInfo: impl.userInfo,
+            userInfo: self.impl.userInfo,
             from: value,
             codingPath: newPath
         )
     }
 
     @inline(__always) private func createTypeMismatchError(type: Any.Type, value: JSONValue) -> DecodingError {
-        let codingPath = self.codingPath + [ArrayKey(index: currentIndex)]
+        let codingPath = self.codingPath + [ArrayKey(index: self.currentIndex)]
         return DecodingError.typeMismatch(type, .init(
             codingPath: codingPath, debugDescription: "Expected to decode \(type) but found \(value.debugDataTypeDescription) instead."
         ))
     }
 
-    @inline(__always) private mutating func decodeFixedWidthInteger<T: FixedWidthInteger>() throws
-        -> T
-    {
+    @inline(__always) private mutating func decodeFixedWidthInteger<T: FixedWidthInteger>() throws -> T {
         defer {
             currentIndex += 1
             if currentIndex == count {
@@ -169,8 +168,8 @@ extension JSONUnkeyedDecodingContainer {
             }
         }
 
-        guard case let .number(number) = array[currentIndex] else {
-            throw createTypeMismatchError(type: T.self, value: array[currentIndex])
+        guard case .number(let number) = self.array[self.currentIndex] else {
+            throw self.createTypeMismatchError(type: T.self, value: self.array[self.currentIndex])
         }
 
         guard let integer = T(number) else {
@@ -181,9 +180,7 @@ extension JSONUnkeyedDecodingContainer {
         return integer
     }
 
-    @inline(__always) private mutating func decodeLosslessStringConvertible<T: LosslessStringConvertible>()
-        throws -> T
-    {
+    @inline(__always) private mutating func decodeLosslessStringConvertible<T: LosslessStringConvertible>() throws -> T {
         defer {
             currentIndex += 1
             if currentIndex == count {
@@ -191,8 +188,8 @@ extension JSONUnkeyedDecodingContainer {
             }
         }
 
-        guard case let .number(number) = array[currentIndex] else {
-            throw createTypeMismatchError(type: T.self, value: array[currentIndex])
+        guard case .number(let number) = self.array[self.currentIndex] else {
+            throw self.createTypeMismatchError(type: T.self, value: self.array[self.currentIndex])
         }
 
         guard let float = T(number) else {

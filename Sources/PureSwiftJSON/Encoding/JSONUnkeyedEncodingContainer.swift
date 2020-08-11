@@ -9,7 +9,7 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 
     init(impl: JSONEncoderImpl, codingPath: [CodingKey]) {
         self.impl = impl
-        array = impl.array!
+        self.array = impl.array!
         self.codingPath = codingPath
     }
 
@@ -23,17 +23,17 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     mutating func encodeNil() throws {}
 
     mutating func encode(_ value: Bool) throws {
-        array.append(.bool(value))
+        self.array.append(.bool(value))
     }
 
     mutating func encode(_ value: String) throws {
-        array.append(.string(value))
+        self.array.append(.string(value))
     }
 
     mutating func encode(_ value: Double) throws {
         guard !value.isNaN, !value.isInfinite else {
             throw EncodingError.invalidValue(value, .init(
-                codingPath: codingPath + [ArrayKey(index: count)],
+                codingPath: self.codingPath + [ArrayKey(index: self.count)],
                 debugDescription: "Unable to encode Double.\(value) directly in JSON."
             ))
         }
@@ -44,7 +44,7 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     mutating func encode(_ value: Float) throws {
         guard !value.isNaN, !value.isInfinite else {
             throw EncodingError.invalidValue(value, .init(
-                codingPath: codingPath + [ArrayKey(index: count)],
+                codingPath: self.codingPath + [ArrayKey(index: self.count)],
                 debugDescription: "Unable to encode Float.\(value) directly in JSON."
             ))
         }
@@ -93,7 +93,7 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     }
 
     mutating func encode<T>(_ value: T) throws where T: Encodable {
-        let newPath = impl.codingPath + [ArrayKey(index: count)]
+        let newPath = self.impl.codingPath + [ArrayKey(index: self.count)]
         let newEncoder = JSONEncoderImpl(userInfo: impl.userInfo, codingPath: newPath)
         try value.encode(to: newEncoder)
 
@@ -101,19 +101,20 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
             preconditionFailure()
         }
 
-        array.append(value)
+        self.array.append(value)
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy _: NestedKey.Type) ->
-        KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
-        let newPath = impl.codingPath + [ArrayKey(index: count)]
-        let object = array.appendObject()
+        KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey
+    {
+        let newPath = self.impl.codingPath + [ArrayKey(index: self.count)]
+        let object = self.array.appendObject()
         let nestedContainer = JSONKeyedEncodingContainer<NestedKey>(impl: impl, object: object, codingPath: newPath)
         return KeyedEncodingContainer(nestedContainer)
     }
 
     mutating func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
-        let newPath = impl.codingPath + [ArrayKey(index: count)]
+        let newPath = self.impl.codingPath + [ArrayKey(index: self.count)]
         let array = self.array.appendArray()
         let nestedContainer = JSONUnkeyedEncodingContainer(impl: impl, array: array, codingPath: newPath)
         return nestedContainer
@@ -126,11 +127,12 @@ struct JSONUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 
 extension JSONUnkeyedEncodingContainer {
     @inline(__always) private mutating func encodeFixedWidthInteger<N: FixedWidthInteger>(_ value: N) throws {
-        array.append(.number(value.description))
+        self.array.append(.number(value.description))
     }
 
     @inline(__always) private mutating func encodeFloatingPoint<N: FloatingPoint>(_ value: N)
-        throws where N: CustomStringConvertible {
-        array.append(.number(value.description))
+        throws where N: CustomStringConvertible
+    {
+        self.array.append(.number(value.description))
     }
 }
