@@ -400,4 +400,32 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         XCTAssertEqual(unkeyedContainer?.isAtEnd, true)
         XCTAssertEqual("bar", try keyedContainer?.decode(String.self, forKey: .foo))
     }
+
+    // MARK: - Failures -
+
+    func testOnlyIncrementOnSuccess() throws {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([.string("foo"), .null]), codingPath: [])
+
+        var container = try impl.unkeyedContainer()
+        XCTAssertEqual(container.currentIndex, 0)
+        XCTAssertEqual(container.isAtEnd, false)
+
+        XCTAssertNil(try? container.decode(Int.self))
+        XCTAssertEqual(try container.decodeNil(), false)
+        XCTAssertEqual(container.currentIndex, 0)
+        XCTAssertEqual(container.isAtEnd, false)
+
+        XCTAssertNotNil(try? container.decode(String.self))
+        XCTAssertEqual(container.currentIndex, 1)
+        XCTAssertEqual(container.isAtEnd, false)
+
+        XCTAssertNil(try? container.decode(String.self))
+        XCTAssertNil(try? container.decode(Bool.self))
+        XCTAssertEqual(container.currentIndex, 1)
+        XCTAssertEqual(container.isAtEnd, false)
+
+        XCTAssertEqual(try? container.decodeNil(), true)
+        XCTAssertEqual(container.currentIndex, 2)
+        XCTAssertEqual(container.isAtEnd, true)
+    }
 }
