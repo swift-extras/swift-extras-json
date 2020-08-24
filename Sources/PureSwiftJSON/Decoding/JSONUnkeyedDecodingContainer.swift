@@ -19,12 +19,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     mutating func decodeNil() throws -> Bool {
         if array[currentIndex] == .null {
-            defer {
-                currentIndex += 1
-                if currentIndex == count {
-                    isAtEnd = true
-                }
-            }
+            self.increment()
             return true
         }
 
@@ -34,32 +29,20 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     mutating func decode(_ type: Bool.Type) throws -> Bool {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
-        }
-
         guard case let .bool(bool) = array[currentIndex] else {
             throw createTypeMismatchError(type: type, value: array[currentIndex])
         }
 
+        self.increment()
         return bool
     }
 
     mutating func decode(_ type: String.Type) throws -> String {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
-        }
-
         guard case let .string(string) = array[currentIndex] else {
             throw createTypeMismatchError(type: type, value: array[currentIndex])
         }
 
+        self.increment()
         return string
     }
 
@@ -133,18 +116,19 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 }
 
 extension JSONUnkeyedDecodingContainer {
-    private mutating func decoderForNextElement() throws -> JSONDecoderImpl {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
+    private mutating func increment() {
+        currentIndex += 1
+        if currentIndex == count {
+            isAtEnd = true
         }
+    }
 
+    private mutating func decoderForNextElement() throws -> JSONDecoderImpl {
         let value = array[currentIndex]
         var newPath = codingPath
         newPath.append(ArrayKey(index: currentIndex))
 
+        self.increment()
         return JSONDecoderImpl(
             userInfo: impl.userInfo,
             from: value,
@@ -162,13 +146,6 @@ extension JSONUnkeyedDecodingContainer {
     @inline(__always) private mutating func decodeFixedWidthInteger<T: FixedWidthInteger>() throws
         -> T
     {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
-        }
-
         guard case let .number(number) = array[currentIndex] else {
             throw createTypeMismatchError(type: T.self, value: array[currentIndex])
         }
@@ -178,19 +155,13 @@ extension JSONUnkeyedDecodingContainer {
                                                    debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
         }
 
+        self.increment()
         return integer
     }
 
     @inline(__always) private mutating func decodeLosslessStringConvertible<T: LosslessStringConvertible>()
         throws -> T
     {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
-        }
-
         guard case let .number(number) = array[currentIndex] else {
             throw createTypeMismatchError(type: T.self, value: array[currentIndex])
         }
@@ -200,6 +171,7 @@ extension JSONUnkeyedDecodingContainer {
                                                    debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
         }
 
+        self.increment()
         return float
     }
 }
