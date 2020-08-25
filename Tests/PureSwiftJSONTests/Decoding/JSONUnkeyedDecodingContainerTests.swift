@@ -16,6 +16,18 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         XCTAssertEqual(container?.isAtEnd, true)
     }
 
+    func testDecodeNullWithNonNullValue() {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([.bool(false)]), codingPath: [])
+
+        var container: UnkeyedDecodingContainer?
+        var result: Bool?
+        XCTAssertNoThrow(container = try impl.unkeyedContainer())
+        XCTAssertNoThrow(result = try container?.decodeNil())
+        XCTAssertEqual(result, false)
+        XCTAssertEqual(container?.currentIndex, 0)
+        XCTAssertEqual(container?.isAtEnd, false)
+    }
+
     func testDecodeNullFromArray() {
         let impl = JSONDecoderImpl(userInfo: [:], from: .array([.object([:])]), codingPath: [])
 
@@ -399,5 +411,27 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         XCTAssertNoThrow(keyedContainer = try unkeyedContainer?.nestedContainer(keyedBy: CodingKeys.self))
         XCTAssertEqual(unkeyedContainer?.isAtEnd, true)
         XCTAssertEqual("bar", try keyedContainer?.decode(String.self, forKey: .foo))
+    }
+    
+    // MARK: - Semantics -
+    
+    func testIndexIncrementSemantics() {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([.bool(false)]), codingPath: [])
+        
+        var container: UnkeyedDecodingContainer?
+        XCTAssertNoThrow(container = try impl.unkeyedContainer())
+        XCTAssertThrowsError(try container?.decode(String.self)) { error in
+            XCTAssertTrue(error is DecodingError)
+            switch error as? DecodingError {
+                case .some(.typeMismatch(let type, let context)):
+                    XCTAssertTrue(type is String.Type)
+                    XCTAssertEqual(context.codingPath.count, 1)
+                    XCTAssertNil(context.underlyingError)
+                default:
+                    XCTFail("Expected DecodingError.typeMismatch, but got \(error)")
+            }
+        }
+        XCTAssertEqual(container?.currentIndex, 0)
+        XCTAssertEqual(container?.isAtEnd, false)
     }
 }
