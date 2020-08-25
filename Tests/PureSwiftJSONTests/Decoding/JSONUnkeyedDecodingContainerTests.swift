@@ -412,23 +412,23 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         XCTAssertEqual(unkeyedContainer?.isAtEnd, true)
         XCTAssertEqual("bar", try keyedContainer?.decode(String.self, forKey: .foo))
     }
-    
+
     // MARK: - Semantics -
-    
+
     func testIndexIncrementSemantics() {
         let impl = JSONDecoderImpl(userInfo: [:], from: .array([.bool(false)]), codingPath: [])
-        
+
         var container: UnkeyedDecodingContainer?
         XCTAssertNoThrow(container = try impl.unkeyedContainer())
         XCTAssertThrowsError(try container?.decode(String.self)) { error in
             XCTAssertTrue(error is DecodingError)
             switch error as? DecodingError {
-                case .some(.typeMismatch(let type, let context)):
-                    XCTAssertTrue(type is String.Type)
-                    XCTAssertEqual(context.codingPath.count, 1)
-                    XCTAssertNil(context.underlyingError)
-                default:
-                    XCTFail("Expected DecodingError.typeMismatch, but got \(error)")
+            case .some(.typeMismatch(let type, let context)):
+                XCTAssertTrue(type is String.Type)
+                XCTAssertEqual(context.codingPath.count, 1)
+                XCTAssertNil(context.underlyingError)
+            default:
+                XCTFail("Expected DecodingError.typeMismatch, but got \(error)")
             }
         }
         XCTAssertEqual(container?.currentIndex, 0)
