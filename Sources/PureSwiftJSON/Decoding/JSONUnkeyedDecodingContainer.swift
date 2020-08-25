@@ -95,8 +95,8 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     mutating func decode<T>(_: T.Type) throws -> T where T: Decodable {
         let decoder = try decoderForNextElement()
-        let result = try T.init(from: decoder)
-        
+        let result = try T(from: decoder)
+
         // Because of the requirement that the index not be incremented unless
         // decoding the desired result type succeeds, it can not be a tail call.
         // Hopefully the compiler still optimizes well enough that the result
@@ -110,7 +110,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     {
         let decoder = try decoderForNextElement()
         let container = try decoder.container(keyedBy: type)
-        
+
         self.currentIndex += 1
         return container
     }
@@ -118,7 +118,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
         let decoder = try decoderForNextElement()
         let container = try decoder.unkeyedContainer()
-        
+
         self.currentIndex += 1
         return container
     }
