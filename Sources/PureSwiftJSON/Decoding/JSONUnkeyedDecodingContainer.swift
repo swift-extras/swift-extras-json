@@ -8,15 +8,6 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     var isAtEnd: Bool { self.currentIndex >= (self.count ?? 0) }
     var currentIndex = 0
 
-    @inline(__always)
-    private func getNextValue() throws -> JSONValue {
-        guard !self.isAtEnd else {
-            throw DecodingError.dataCorruptedError(in: self,
-                                                   debugDescription: "Index \(self.currentIndex) out of bounds (\(self.array.count)) trying to decode value.")
-        }
-        return self.array[self.currentIndex]
-    }
-
     init(impl: JSONDecoderImpl, codingPath: [CodingKey], array: [JSONValue]) {
         self.impl = impl
         self.codingPath = codingPath
@@ -135,6 +126,15 @@ extension JSONUnkeyedDecodingContainer {
             from: value,
             codingPath: newPath
         )
+    }
+
+    @inline(__always)
+    private func getNextValue() throws -> JSONValue {
+        guard !self.isAtEnd else {
+            throw DecodingError.dataCorruptedError(in: self,
+                                                   debugDescription: "Index \(self.currentIndex) out of bounds (\(self.array.count)) trying to decode value.")
+        }
+        return self.array[self.currentIndex]
     }
 
     @inline(__always) private func createTypeMismatchError(type: Any.Type, value: JSONValue) -> DecodingError {
