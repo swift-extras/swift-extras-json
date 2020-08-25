@@ -8,6 +8,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     var isAtEnd: Bool { self.currentIndex >= (self.count ?? 0) }
     var currentIndex = 0
 
+    @inline(__always)
     private func getNextValue() throws -> JSONValue {
         guard !self.isAtEnd else {
             throw DecodingError.dataCorruptedError(in: self,
