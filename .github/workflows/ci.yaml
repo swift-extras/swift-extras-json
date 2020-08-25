@@ -9,15 +9,15 @@ on:
 
 jobs:
 
-  "sanity-Tests":
+  "validity-Tests":
     runs-on: macOS-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Install swiftformat
       run: brew install swiftformat
-    - name: Run sanity
-      run: ./scripts/sanity.sh .
+    - name: Run validity
+      run: ./scripts/validity.sh .
 
   "tuxOS-Tests":
     runs-on: ubuntu-latest
