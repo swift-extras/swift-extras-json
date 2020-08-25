@@ -4,10 +4,10 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     let codingPath: [CodingKey]
     let array: [JSONValue]
 
-    let count: Int? { array.count }
-    var isAtEnd: Bool { currentIndex >= (count ?? 0) }
+    var count: Int? { self.array.count }
+    var isAtEnd: Bool { self.currentIndex >= (self.count ?? 0) }
     var currentIndex = 0
-    
+
     private func getNextValue() throws -> JSONValue {
         guard !self.isAtEnd else {
             throw DecodingError.dataCorruptedError(in: self,
@@ -15,7 +15,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         }
         return self.array[self.currentIndex]
     }
-    
+
     init(impl: JSONDecoderImpl, codingPath: [CodingKey], array: [JSONValue]) {
         self.impl = impl
         self.codingPath = codingPath
@@ -39,7 +39,7 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
             throw createTypeMismatchError(type: type, value: value)
         }
 
-        self.currentIndex += 1  
+        self.currentIndex += 1
         return bool
     }
 
@@ -158,7 +158,7 @@ extension JSONUnkeyedDecodingContainer {
         return integer
     }
 
-    @inline(__always) private mutating func decode BinaryFloatingPoint<T: LosslessStringConvertible>() throws -> T {
+    @inline(__always) private mutating func decodeBinaryFloatingPoint<T: LosslessStringConvertible>() throws -> T {
         let value = try self.getNextValue()
         guard case .number(let number) = value else {
             throw self.createTypeMismatchError(type: T.self, value: value)
@@ -168,7 +168,7 @@ extension JSONUnkeyedDecodingContainer {
             throw DecodingError.dataCorruptedError(in: self,
                                                    debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
         }
-        
+
         self.currentIndex += 1
         return float
     }
