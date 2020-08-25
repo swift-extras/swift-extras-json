@@ -4,27 +4,27 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     let codingPath: [CodingKey]
     let array: [JSONValue]
 
-    let count: Int? // protocol requirement to be optional
-    var isAtEnd: Bool
+    let count: Int? { array.count }
+    var isAtEnd: Bool { currentIndex >= (count ?? 0) }
     var currentIndex = 0
-
+    
+    private func getNextValue() throws -> JSONValue {
+        guard !self.isAtEnd else {
+            throw DecodingError.dataCorruptedError(in: self,
+                                                   debugDescription: "Index \(self.currentIndex) out of bounds (\(self.array.count)) trying to decode value.")
+        }
+        return self.array[self.currentIndex]
+    }
+    
     init(impl: JSONDecoderImpl, codingPath: [CodingKey], array: [JSONValue]) {
         self.impl = impl
         self.codingPath = codingPath
         self.array = array
-
-        self.isAtEnd = array.count == 0
-        self.count = array.count
     }
 
     mutating func decodeNil() throws -> Bool {
-        if self.array[self.currentIndex] == .null {
-            defer {
-                currentIndex += 1
-                if currentIndex == count {
-                    isAtEnd = true
-                }
-            }
+        if try self.getNextValue() == .null {
+            self.currentIndex += 1
             return true
         }
 
@@ -34,41 +34,31 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     mutating func decode(_ type: Bool.Type) throws -> Bool {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
+        let value = try self.getNextValue()
+        guard case .bool(let bool) = value else {
+            throw createTypeMismatchError(type: type, value: value)
         }
 
-        guard case .bool(let bool) = self.array[self.currentIndex] else {
-            throw createTypeMismatchError(type: type, value: self.array[self.currentIndex])
-        }
-
+        self.currentIndex += 1  
         return bool
     }
 
     mutating func decode(_ type: String.Type) throws -> String {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
+        let value = try self.getNextValue()
+        guard case .string(let string) = value else {
+            throw createTypeMismatchError(type: type, value: value)
         }
 
-        guard case .string(let string) = self.array[self.currentIndex] else {
-            throw createTypeMismatchError(type: type, value: self.array[self.currentIndex])
-        }
-
+        self.currentIndex += 1
         return string
     }
 
     mutating func decode(_: Double.Type) throws -> Double {
-        try decodeLosslessStringConvertible()
+        try decodeBinaryFloatingPoint()
     }
 
     mutating func decode(_: Float.Type) throws -> Float {
-        try decodeLosslessStringConvertible()
+        try decodeBinaryFloatingPoint()
     }
 
     mutating func decode(_: Int.Type) throws -> Int {
@@ -135,16 +125,9 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
 extension JSONUnkeyedDecodingContainer {
     private mutating func decoderForNextElement() throws -> JSONDecoderImpl {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
-        }
-
-        let value = self.array[self.currentIndex]
-        var newPath = self.codingPath
-        newPath.append(ArrayKey(index: self.currentIndex))
+        let value = try self.getNextValue()
+        let newPath = self.codingPath + [ArrayKey(index: self.currentIndex)]
+        self.currentIndex += 1
 
         return JSONDecoderImpl(
             userInfo: self.impl.userInfo,
@@ -161,15 +144,9 @@ extension JSONUnkeyedDecodingContainer {
     }
 
     @inline(__always) private mutating func decodeFixedWidthInteger<T: FixedWidthInteger>() throws -> T {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
-        }
-
-        guard case .number(let number) = self.array[self.currentIndex] else {
-            throw self.createTypeMismatchError(type: T.self, value: self.array[self.currentIndex])
+        let value = try self.getNextValue()
+        guard case .number(let number) = value else {
+            throw self.createTypeMismatchError(type: T.self, value: value)
         }
 
         guard let integer = T(number) else {
@@ -177,26 +154,22 @@ extension JSONUnkeyedDecodingContainer {
                                                    debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
         }
 
+        self.currentIndex += 1
         return integer
     }
 
-    @inline(__always) private mutating func decodeLosslessStringConvertible<T: LosslessStringConvertible>() throws -> T {
-        defer {
-            currentIndex += 1
-            if currentIndex == count {
-                isAtEnd = true
-            }
-        }
-
-        guard case .number(let number) = self.array[self.currentIndex] else {
-            throw self.createTypeMismatchError(type: T.self, value: self.array[self.currentIndex])
+    @inline(__always) private mutating func decode BinaryFloatingPoint<T: LosslessStringConvertible>() throws -> T {
+        let value = try self.getNextValue()
+        guard case .number(let number) = value else {
+            throw self.createTypeMismatchError(type: T.self, value: value)
         }
 
         guard let float = T(number) else {
             throw DecodingError.dataCorruptedError(in: self,
                                                    debugDescription: "Parsed JSON number <\(number)> does not fit in \(T.self).")
         }
-
+        
+        self.currentIndex += 1
         return float
     }
 }
