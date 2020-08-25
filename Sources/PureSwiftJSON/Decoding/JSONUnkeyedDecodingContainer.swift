@@ -95,19 +95,32 @@ struct JSONUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     mutating func decode<T>(_: T.Type) throws -> T where T: Decodable {
         let decoder = try decoderForNextElement()
-        return try T(from: decoder)
+        let result = try T.init(from: decoder)
+        
+        // Because of the requirement that the index not be incremented unless
+        // decoding the desired result type succeeds, it can not be a tail call.
+        // Hopefully the compiler still optimizes well enough that the result
+        // doesn't get copied around.
+        self.currentIndex += 1
+        return result
     }
 
     mutating func nestedContainer<NestedKey>(keyedBy type: NestedKey.Type) throws
         -> KeyedDecodingContainer<NestedKey> where NestedKey: CodingKey
     {
         let decoder = try decoderForNextElement()
-        return try decoder.container(keyedBy: type)
+        let container = try decoder.container(keyedBy: type)
+        
+        self.currentIndex += 1
+        return container
     }
 
     mutating func nestedUnkeyedContainer() throws -> UnkeyedDecodingContainer {
         let decoder = try decoderForNextElement()
-        return try decoder.unkeyedContainer()
+        let container = try decoder.unkeyedContainer()
+        
+        self.currentIndex += 1
+        return container
     }
 
     mutating func superDecoder() throws -> Decoder {
@@ -119,7 +132,6 @@ extension JSONUnkeyedDecodingContainer {
     private mutating func decoderForNextElement() throws -> JSONDecoderImpl {
         let value = try self.getNextValue()
         let newPath = self.codingPath + [ArrayKey(index: self.currentIndex)]
-        self.currentIndex += 1
 
         return JSONDecoderImpl(
             userInfo: self.impl.userInfo,
