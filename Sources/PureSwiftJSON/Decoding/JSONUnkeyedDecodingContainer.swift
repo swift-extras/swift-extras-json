@@ -155,14 +155,14 @@ extension JSONUnkeyedDecodingContainer {
         guard !self.isAtEnd else {
             if isNested {
                 throw DecodingError.valueNotFound(T.self,
-                    .init(codingPath: self.codingPath,
-                          debugDescription: "Cannot get nested keyed container -- unkeyed container is at end.",
-                          underlyingError: nil))
+                                                  .init(codingPath: self.codingPath,
+                                                        debugDescription: "Cannot get nested keyed container -- unkeyed container is at end.",
+                                                        underlyingError: nil))
             } else {
                 throw DecodingError.valueNotFound(T.self,
-                    .init(codingPath: [ArrayKey(index: self.currentIndex)],
-                          debugDescription: "Unkeyed container is at end.",
-                          underlyingError: nil))
+                                                  .init(codingPath: [ArrayKey(index: self.currentIndex)],
+                                                        debugDescription: "Unkeyed container is at end.",
+                                                        underlyingError: nil))
             }
         }
         return self.array[self.currentIndex]
