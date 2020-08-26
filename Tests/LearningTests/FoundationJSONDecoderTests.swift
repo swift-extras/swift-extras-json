@@ -268,4 +268,73 @@ class FoundationJSONDecoderTests: XCTestCase {
             XCTFail("Unexpected error: \(error)")
         }
     }
+    
+    func testDecodePastEndOfUnkeyedContainer() {
+        struct HelloWorld: Decodable {
+            enum CodingKeys: String, CodingKey { case list }
+            
+            init(from decoder: Decoder) throws {
+                var container = try decoder.container(keyedBy: CodingKeys.self).nestedUnkeyedContainer(forKey: .list)
+                _ = try container.decode(String.self)
+            }
+        }
+        
+        let json = #"{"list":[]}"#
+        
+        XCTAssertThrowsError(_ = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) { error in
+            guard case let .valueNotFound(type, context) = (error as? DecodingError) else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+            XCTAssertTrue(type is String.Type)
+            XCTAssertEqual(context.codingPath.count, 1)
+            XCTAssertEqual(context.codingPath.first?.intValue, 0)
+            XCTAssertEqual(context.debugDescription, "Unkeyed container is at end.")
+        }
+    }
+
+    func testDecodeNestedKeyedContainerPastEndOfUnkeyedContainer() {
+        struct HelloWorld: Decodable {
+            enum CodingKeys: String, CodingKey { case list }
+            
+            init(from decoder: Decoder) throws {
+                var container = try decoder.container(keyedBy: CodingKeys.self).nestedUnkeyedContainer(forKey: .list)
+                _ = try container.nestedContainer(keyedBy: CodingKeys.self)
+            }
+        }
+        
+        let json = #"{"list":[]}"#
+        
+        XCTAssertThrowsError(_ = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) { error in
+            guard case let .some(.valueNotFound(type, context)) = (error as? DecodingError) else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+            XCTAssertTrue(type is KeyedDecodingContainer<HelloWorld.CodingKeys>.Type)
+            XCTAssertEqual(context.codingPath.count, 1)
+            XCTAssertEqual(context.codingPath.first?.stringValue, HelloWorld.CodingKeys.list.rawValue)
+            XCTAssertEqual(context.debugDescription, "Cannot get nested keyed container -- unkeyed container is at end.")
+        }
+    }
+
+    func testDecodeNestedUnkeyedContainerPastEndOfUnkeyedContainer() {
+        struct HelloWorld: Decodable {
+            enum CodingKeys: String, CodingKey { case list }
+            
+            init(from decoder: Decoder) throws {
+                var container = try decoder.container(keyedBy: CodingKeys.self).nestedUnkeyedContainer(forKey: .list)
+                _ = try container.nestedUnkeyedContainer()
+            }
+        }
+        
+        let json = #"{"list":[]}"#
+        
+        XCTAssertThrowsError(_ = try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) { error in
+            guard case let .some(.valueNotFound(type, context)) = (error as? DecodingError) else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+            XCTAssertTrue(type is UnkeyedDecodingContainer.Protocol)
+            XCTAssertEqual(context.codingPath.count, 1)
+            XCTAssertEqual(context.codingPath.first?.stringValue, HelloWorld.CodingKeys.list.rawValue)
+            XCTAssertEqual(context.debugDescription, "Cannot get nested keyed container -- unkeyed container is at end.")
+        }
+    }
 }
