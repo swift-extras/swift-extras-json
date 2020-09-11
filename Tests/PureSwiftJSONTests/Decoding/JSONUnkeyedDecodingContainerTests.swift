@@ -16,6 +16,18 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         XCTAssertEqual(container?.isAtEnd, true)
     }
 
+    func testDecodeNullWithNonNullValue() {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([.bool(false)]), codingPath: [])
+
+        var container: UnkeyedDecodingContainer?
+        var result: Bool?
+        XCTAssertNoThrow(container = try impl.unkeyedContainer())
+        XCTAssertNoThrow(result = try container?.decodeNil())
+        XCTAssertEqual(result, false)
+        XCTAssertEqual(container?.currentIndex, 0)
+        XCTAssertEqual(container?.isAtEnd, false)
+    }
+
     func testDecodeNullFromArray() {
         let impl = JSONDecoderImpl(userInfo: [:], from: .array([.object([:])]), codingPath: [])
 
@@ -399,5 +411,70 @@ class JSONUnkeyedDecodingContainerTests: XCTestCase {
         XCTAssertNoThrow(keyedContainer = try unkeyedContainer?.nestedContainer(keyedBy: CodingKeys.self))
         XCTAssertEqual(unkeyedContainer?.isAtEnd, true)
         XCTAssertEqual("bar", try keyedContainer?.decode(String.self, forKey: .foo))
+    }
+
+    // MARK: - Semantics -
+
+    func testIndexIncrementSemantics() {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([.bool(false)]), codingPath: [])
+
+        var container: UnkeyedDecodingContainer?
+        XCTAssertNoThrow(container = try impl.unkeyedContainer())
+        XCTAssertThrowsError(try container?.decode(String.self)) { error in
+            guard case .typeMismatch(let type, let context) = (error as? DecodingError) else {
+                return XCTFail("Expected DecodingError.typeMismatch, but got \(error)")
+            }
+            XCTAssertTrue(type is String.Type)
+            XCTAssertEqual(context.codingPath.count, 1)
+            XCTAssertNil(context.underlyingError)
+        }
+        XCTAssertEqual(container?.currentIndex, 0)
+        XCTAssertEqual(container?.isAtEnd, false)
+    }
+
+    func testDecodePastEndOfUnkeyedContainer() {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([]), codingPath: [])
+
+        var container: UnkeyedDecodingContainer?
+        XCTAssertNoThrow(container = try impl.unkeyedContainer())
+        XCTAssertThrowsError(_ = try container?.decode(String.self)) {
+            guard case .valueNotFound(let type, let context) = ($0 as? DecodingError) else {
+                return XCTFail("Unexpected error: \($0)")
+            }
+            XCTAssertTrue(type is String.Type)
+            XCTAssertEqual(context.codingPath.count, 1)
+            XCTAssertEqual(context.codingPath.first?.intValue, 0)
+            XCTAssertEqual(context.debugDescription, "Unkeyed container is at end.")
+        }
+    }
+
+    func testDecodeNestedKeyedContainerPastEndOfUnkeyedContainer() {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([]), codingPath: [])
+
+        var container: UnkeyedDecodingContainer?
+        XCTAssertNoThrow(container = try impl.unkeyedContainer())
+        XCTAssertThrowsError(_ = try container?.nestedContainer(keyedBy: ArrayKey.self)) {
+            guard case .valueNotFound(let type, let context) = ($0 as? DecodingError) else {
+                return XCTFail("Unexpected error: \($0)")
+            }
+            XCTAssertTrue(type is KeyedDecodingContainer<ArrayKey>.Type)
+            XCTAssertTrue(context.codingPath.isEmpty)
+            XCTAssertEqual(context.debugDescription, "Cannot get nested keyed container -- unkeyed container is at end.")
+        }
+    }
+
+    func testDecodeNestedUnkeyedContainerPastEndOfUnkeyedContainer() {
+        let impl = JSONDecoderImpl(userInfo: [:], from: .array([]), codingPath: [])
+
+        var container: UnkeyedDecodingContainer?
+        XCTAssertNoThrow(container = try impl.unkeyedContainer())
+        XCTAssertThrowsError(_ = try container?.nestedUnkeyedContainer()) {
+            guard case .valueNotFound(let type, let context) = ($0 as? DecodingError) else {
+                return XCTFail("Unexpected error: \($0)")
+            }
+            XCTAssertTrue(type is UnkeyedDecodingContainer.Protocol)
+            XCTAssertTrue(context.codingPath.isEmpty)
+            XCTAssertEqual(context.debugDescription, "Cannot get nested keyed container -- unkeyed container is at end.")
+        }
     }
 }
