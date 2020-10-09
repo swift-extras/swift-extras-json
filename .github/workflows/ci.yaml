@@ -26,7 +26,8 @@ jobs:
         images:
         - swift:5.1
         - swift:5.2
-        - swiftlang/swift:nightly-5.3-bionic
+        - swift:5.3
+        - swiftlang/swift:nightly-master-focal
     container:
       image: ${{ matrix.images }}
     steps:
@@ -50,7 +51,8 @@ jobs:
         images:
         - swift:5.1
         - swift:5.2
-        - swiftlang/swift:nightly-5.3-bionic
+        - swift:5.3
+        - swiftlang/swift:nightly-master-focal
     container:
       image: ${{ matrix.images }}
     steps:
@@ -70,7 +72,8 @@ jobs:
         images:
         - swift:5.1
         - swift:5.2
-        - swiftlang/swift:nightly-5.3-bionic
+        - swift:5.3
+        - swiftlang/swift:nightly-master-focal
     container:
       image: ${{ matrix.images }}
     env:
