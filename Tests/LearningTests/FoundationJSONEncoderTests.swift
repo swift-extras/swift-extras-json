@@ -32,32 +32,29 @@ class FoundationJSONEncoderTests: XCTestCase {
     }
 
     // this works only on Darwin, on Linux an error is thrown.
-    func testEncodeTopLevelString() throws {
-        let result = try Foundation.JSONEncoder().encode("Hello World")
+    func testEncodeTopLevelString() {
+        var result: Data?
+        XCTAssertNoThrow(result = try Foundation.JSONEncoder().encode("Hello World"))
 
-        let json = String(data: result, encoding: .utf8)
-        XCTAssertEqual(json, #""Hello World""#)
+        XCTAssertEqual(try String(data: XCTUnwrap(result), encoding: .utf8), #""Hello World""#)
     }
     #endif
 
-    func testEncodeTopLevelDoubleNaN() throws {
-        do {
-            _ = try Foundation.JSONEncoder().encode(Double.nan)
-        } catch Swift.EncodingError.invalidValue(let value as Double, _) {
-            XCTAssert(value.isNaN) // expected
-        } catch {
-            XCTFail("Unexpected error: \(error)")
+    func testEncodeTopLevelDoubleNaN() {
+        XCTAssertThrowsError(try Foundation.JSONEncoder().encode(Double.nan)) { error in
+            guard case Swift.EncodingError.invalidValue(let value as Double, _) = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+            XCTAssert(value.isNaN)
         }
     }
 
-    func testEncodeTopLevelDoubleInfinity() throws {
-        do {
-            _ = try Foundation.JSONEncoder().encode(Double.infinity)
-        } catch Swift.EncodingError.invalidValue(let value as Double, let context) {
-            print(context)
-            XCTAssert(value.isInfinite) // expected
-        } catch {
-            XCTFail("Unexpected error: \(error)")
+    func testEncodeTopLevelDoubleInfinity() {
+        XCTAssertThrowsError(try Foundation.JSONEncoder().encode(Double.infinity)) { error in
+            guard case Swift.EncodingError.invalidValue(let value as Double, _) = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+            XCTAssert(value.isInfinite)
         }
     }
 
