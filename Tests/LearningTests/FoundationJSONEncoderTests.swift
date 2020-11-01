@@ -22,7 +22,7 @@ class FoundationJSONEncoderTests: XCTestCase {
         ]))
     }
 
-    #if canImport(Darwin)
+    #if swift(>=5.2) || canImport(Darwin)
     // this works only on Darwin, on Linux an error is thrown.
     func testEncodeNull() throws {
         let result = try Foundation.JSONEncoder().encode(nil as String?)
@@ -30,9 +30,7 @@ class FoundationJSONEncoderTests: XCTestCase {
         let json = String(data: result, encoding: .utf8)
         XCTAssertEqual(json, "null")
     }
-    #endif
 
-    #if canImport(Darwin)
     // this works only on Darwin, on Linux an error is thrown.
     func testEncodeTopLevelString() throws {
         let result = try Foundation.JSONEncoder().encode("Hello World")
@@ -101,6 +99,7 @@ class FoundationJSONEncoderTests: XCTestCase {
         }
     }
 
+    #if swift(>=5.2) || canImport(Darwin)
     func testEncodeLineFeed() {
         let input = String(decoding: [10], as: Unicode.UTF8.self)
         var result: Data?
@@ -121,6 +120,7 @@ class FoundationJSONEncoderTests: XCTestCase {
         XCTAssertNoThrow(result = try JSONEncoder().encode(input))
         XCTAssertEqual(try Array(XCTUnwrap(result)), [34, 92, 114, 34])
     }
+    #endif
 }
 
 extension FoundationJSONEncoderTests.HelloWorld.SubType: Encodable {
