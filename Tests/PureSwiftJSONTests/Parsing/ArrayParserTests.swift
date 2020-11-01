@@ -33,7 +33,7 @@ class ArrayParserTests: XCTestCase {
 
     func testSimpleTrueAndStringArray() {
         var result: JSONValue?
-        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#"[   true  , "hello" ]"# .utf8)))
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#"[   true  , "hello" ]"#.utf8)))
         XCTAssertEqual(result, .array([.bool(true), .string("hello")]))
     }
 

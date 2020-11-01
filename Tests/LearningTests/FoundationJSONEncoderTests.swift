@@ -100,21 +100,21 @@ class FoundationJSONEncoderTests: XCTestCase {
             XCTFail("Unexpected error: \(error)")
         }
     }
-    
+
     func testEncodeLineFeed() {
         let input = String(decoding: [10], as: Unicode.UTF8.self)
         var result: Data?
         XCTAssertNoThrow(result = try JSONEncoder().encode(input))
         XCTAssertEqual(try Array(XCTUnwrap(result)), [34, 92, 110, 34])
     }
-    
+
     func testEncodeBackspace() {
         let input = String(decoding: [08], as: Unicode.UTF8.self)
         var result: Data?
         XCTAssertNoThrow(result = try JSONEncoder().encode(input))
         XCTAssertEqual(try Array(XCTUnwrap(result)), [34, 92, 98, 34])
     }
-    
+
     func testEncodeCarriageReturn() {
         let input = String(decoding: [13], as: Unicode.UTF8.self)
         var result: Data?

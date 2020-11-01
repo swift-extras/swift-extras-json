@@ -45,7 +45,7 @@ class JSONValueTests: XCTestCase {
             #""\u001E""#,
             #""\u001F""#,
         ]
-        
+
         for index in 0 ... 31 {
             let controlCharacters = Unicode.Scalar(index)!
             let value = JSONValue.string("\(controlCharacters)")
@@ -91,13 +91,13 @@ class JSONValueTests: XCTestCase {
         let value = JSONValue.string("🥑")
         var bytes = [UInt8]()
         value.appendBytes(to: &bytes)
-        XCTAssertEqual(bytes, [UInt8](#""🥑""# .utf8))
+        XCTAssertEqual(bytes, [UInt8](#""🥑""#.utf8))
     }
 
     func testEmojiFamily() {
         let value = JSONValue.string("👩‍👩‍👧‍👧")
         var bytes = [UInt8]()
         value.appendBytes(to: &bytes)
-        XCTAssertEqual(bytes, [UInt8](#""👩‍👩‍👧‍👧""# .utf8))
+        XCTAssertEqual(bytes, [UInt8](#""👩‍👩‍👧‍👧""#.utf8))
     }
 }

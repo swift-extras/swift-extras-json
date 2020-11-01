@@ -92,8 +92,8 @@ public struct JSONParser {
 
     mutating func parseNull() throws {
         guard self.reader.read()?.0 == UInt8(ascii: "u"),
-            self.reader.read()?.0 == UInt8(ascii: "l"),
-            self.reader.read()?.0 == UInt8(ascii: "l")
+              self.reader.read()?.0 == UInt8(ascii: "l"),
+              self.reader.read()?.0 == UInt8(ascii: "l")
         else {
             guard let value = reader.value else {
                 throw JSONError.unexpectedEndOfFile
@@ -109,8 +109,8 @@ public struct JSONParser {
         switch self.reader.value {
         case UInt8(ascii: "t"):
             guard self.reader.read()?.0 == UInt8(ascii: "r"),
-                self.reader.read()?.0 == UInt8(ascii: "u"),
-                self.reader.read()?.0 == UInt8(ascii: "e")
+                  self.reader.read()?.0 == UInt8(ascii: "u"),
+                  self.reader.read()?.0 == UInt8(ascii: "e")
             else {
                 guard let value = reader.value else {
                     throw JSONError.unexpectedEndOfFile
@@ -122,9 +122,9 @@ public struct JSONParser {
             return true
         case UInt8(ascii: "f"):
             guard self.reader.read()?.0 == UInt8(ascii: "a"),
-                self.reader.read()?.0 == UInt8(ascii: "l"),
-                self.reader.read()?.0 == UInt8(ascii: "s"),
-                self.reader.read()?.0 == UInt8(ascii: "e")
+                  self.reader.read()?.0 == UInt8(ascii: "l"),
+                  self.reader.read()?.0 == UInt8(ascii: "s"),
+                  self.reader.read()?.0 == UInt8(ascii: "e")
             else {
                 guard let value = reader.value else {
                     throw JSONError.unexpectedEndOfFile
@@ -207,7 +207,7 @@ public struct JSONParser {
 
             case UInt8(ascii: "e"), UInt8(ascii: "E"):
                 guard numbersSinceControlChar > 0,
-                    pastControlChar == .operand || pastControlChar == .decimalPoint
+                      pastControlChar == .operand || pastControlChar == .decimalPoint
                 else {
                     throw JSONError.unexpectedCharacter(ascii: byte, characterIndex: index)
                 }

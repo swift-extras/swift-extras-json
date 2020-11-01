@@ -10,7 +10,6 @@ class FoundationJSONDecoderTests: XCTestCase {
             }
         }
 
-        
         let json = #"{"hello":"world"}"#
         XCTAssertThrowsError(try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) { error in
             guard case Swift.DecodingError.typeMismatch(let type, _) = error else {
@@ -32,7 +31,6 @@ class FoundationJSONDecoderTests: XCTestCase {
             }
         }
 
-        
         let json = #"["haha", "hihi"]"#
         XCTAssertThrowsError(try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) { error in
             guard case Swift.DecodingError.typeMismatch(let type, _) = error else {
@@ -79,7 +77,6 @@ class FoundationJSONDecoderTests: XCTestCase {
             }
         }
 
-        
         let json = #"{"hello": 12}"#
         XCTAssertThrowsError(try JSONDecoder().decode(HelloWorld.self, from: json.data(using: .utf8)!)) { error in
             guard case Swift.DecodingError.typeMismatch(let type, _) = error else {
@@ -107,7 +104,7 @@ class FoundationJSONDecoderTests: XCTestCase {
             guard case Swift.DecodingError.keyNotFound(let codingKey, let context) = error else {
                 return XCTFail("Unexpected error: \(error)")
             }
-            
+
             XCTAssertEqual(codingKey as? HelloWorld.CodingKeys, .hello)
             XCTAssertEqual(context.debugDescription, "No value associated with key CodingKeys(stringValue: \"hello\", intValue: nil) (\"hello\").")
         }
