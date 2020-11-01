@@ -22,6 +22,7 @@ jobs:
   "tuxOS-Tests":
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         images:
         - swift:5.1
@@ -47,6 +48,7 @@ jobs:
   "tuxOS-Performance-Tests":
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         images:
         - swift:5.1
@@ -68,6 +70,7 @@ jobs:
   "tuxOS-Integration-Tests":
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         images:
         - swift:5.1
@@ -88,11 +91,12 @@ jobs:
   "macOS-Tests":
     runs-on: macOS-latest
     strategy:
+      fail-fast: false
       matrix:
         xcode:
         - Xcode_11.1.app
         - Xcode_11.6.app
-        - Xcode_12.app
+        - Xcode_12.2.app
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -112,11 +116,12 @@ jobs:
   "macOS-Performance-Tests":
     runs-on: macOS-latest
     strategy:
+      fail-fast: false
       matrix:
         xcode:
         - Xcode_11.1.app
         - Xcode_11.6.app
-        - Xcode_12.app
+        - Xcode_12.2.app
     steps:
     - name: Checkout
       uses: actions/checkout@v2

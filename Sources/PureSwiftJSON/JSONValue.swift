@@ -83,12 +83,52 @@ extension JSONValue {
                 // quotation marks, except for the characters that MUST be escaped:
                 // quotation mark, reverse solidus, and the control characters (U+0000
                 // through U+001F).
-                // https://tools.ietf.org/html/rfc7159#section-7
+                // https://tools.ietf.org/html/rfc8259#section-7
 
                 // copy the current range over
                 bytes.append(contentsOf: stringBytes[startCopyIndex ..< nextIndex])
-                bytes.append(UInt8(ascii: "\\"))
-                bytes.append(stringBytes[nextIndex])
+                switch stringBytes[nextIndex] {
+                case UInt8(ascii: "\""): // quotation mark
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "\""))
+                case UInt8(ascii: "\\"): // reverse solidus
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "\\"))
+                case 0x08: // backspace
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "b"))
+                case 0x0C: // form feed
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "f"))
+                case 0x0A: // line feed
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "n"))
+                case 0x0D: // carriage return
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "r"))
+                case 0x09: // tab
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "t"))
+                default:
+                    func valueToAscii(_ value: UInt8) -> UInt8 {
+                        switch value {
+                        case 0 ... 9:
+                            return value + UInt8(ascii: "0")
+                        case 10 ... 15:
+                            return value - 10 + UInt8(ascii: "A")
+                        default:
+                            preconditionFailure()
+                        }
+                    }
+                    bytes.append(UInt8(ascii: "\\"))
+                    bytes.append(UInt8(ascii: "u"))
+                    bytes.append(UInt8(ascii: "0"))
+                    bytes.append(UInt8(ascii: "0"))
+                    let first = stringBytes[nextIndex] / 16
+                    let remaining = stringBytes[nextIndex] % 16
+                    bytes.append(valueToAscii(first))
+                    bytes.append(valueToAscii(remaining))
+                }
 
                 nextIndex = stringBytes.index(after: nextIndex)
                 startCopyIndex = nextIndex

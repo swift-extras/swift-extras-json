@@ -143,7 +143,7 @@
             // if we have a high surrogate we expect a low surrogate next
             let highSurrogateBitPattern = bitPattern
             guard let (escapeChar, _) = read(),
-                let (uChar, _) = read()
+                  let (uChar, _) = read()
             else {
                 throw JSONError.unexpectedEndOfFile
             }
@@ -180,20 +180,20 @@
     }
 
     @inlinable mutating func parseUnicodeHexSequence() throws -> UInt16 {
-        // As stated in RFC-7159 an escaped unicode character is 4 HEXDIGITs long
-        // https://tools.ietf.org/html/rfc7159#section-7
+        // As stated in RFC-8259 an escaped unicode character is 4 HEXDIGITs long
+        // https://tools.ietf.org/html/rfc8259#section-7
         guard let (firstHex, startIndex) = read(),
-            let (secondHex, _) = read(),
-            let (thirdHex, _) = read(),
-            let (forthHex, _) = read()
+              let (secondHex, _) = read(),
+              let (thirdHex, _) = read(),
+              let (forthHex, _) = read()
         else {
             throw JSONError.unexpectedEndOfFile
         }
 
         guard let first = DocumentReader.hexAsciiTo4Bits(firstHex),
-            let second = DocumentReader.hexAsciiTo4Bits(secondHex),
-            let third = DocumentReader.hexAsciiTo4Bits(thirdHex),
-            let forth = DocumentReader.hexAsciiTo4Bits(forthHex)
+              let second = DocumentReader.hexAsciiTo4Bits(secondHex),
+              let third = DocumentReader.hexAsciiTo4Bits(thirdHex),
+              let forth = DocumentReader.hexAsciiTo4Bits(forthHex)
         else {
             let hexString = String(decoding: [firstHex, secondHex, thirdHex, forthHex], as: Unicode.UTF8.self)
             throw JSONError.invalidHexDigitSequence(hexString, index: startIndex)

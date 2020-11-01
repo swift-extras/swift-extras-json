@@ -10,14 +10,14 @@ class ObjectParserTests: XCTestCase {
 
     func testSimpleKeyValueArray() {
         var result: JSONValue?
-        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#"{ "hello" : "world" }"# .utf8)))
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#"{ "hello" : "world" }"#.utf8)))
         XCTAssertEqual(result, .object(["hello": .string("world")]))
     }
 
     func testTwoKeyValueArray() {
         var result: JSONValue?
         XCTAssertNoThrow(result = try JSONParser().parse(bytes:
-            [UInt8](#"{ "hello" : "world", "haha" \#n\#t: true }"# .utf8)))
+            [UInt8](#"{ "hello" : "world", "haha" \#n\#t: true }"#.utf8)))
         XCTAssertEqual(result, .object(["hello": .string("world"), "haha": .bool(true)]))
     }
 

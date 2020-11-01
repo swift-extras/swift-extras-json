@@ -143,4 +143,22 @@ class JSONEncoderTests: XCTestCase {
         encoder.userInfo[CodingUserInfoKey(rawValue: "foo")!] = "bar"
         XCTAssertNoThrow(_ = try encoder.encode(Foo()))
     }
+
+    func testStringEscaping() {
+        let string = """
+        Hello,\n\nHello\n\nHello\n\nHello
+        """
+        let encoder = PSJSONEncoder()
+        var bytes: [UInt8]?
+        XCTAssertNoThrow(bytes = try encoder.encode(string))
+        var json: String?
+        XCTAssertNoThrow(json = try String(decoding: XCTUnwrap(bytes), as: Unicode.UTF8.self))
+
+        let expected = """
+        "Hello,\\n\\nHello\\n\\nHello\\n\\nHello"
+        """
+
+        XCTAssertEqual(expected, json)
+//        XCTAss
+    }
 }
