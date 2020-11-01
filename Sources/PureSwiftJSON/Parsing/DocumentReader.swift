@@ -180,8 +180,8 @@
     }
 
     @inlinable mutating func parseUnicodeHexSequence() throws -> UInt16 {
-        // As stated in RFC-7159 an escaped unicode character is 4 HEXDIGITs long
-        // https://tools.ietf.org/html/rfc7159#section-7
+        // As stated in RFC-8259 an escaped unicode character is 4 HEXDIGITs long
+        // https://tools.ietf.org/html/rfc8259#section-7
         guard let (firstHex, startIndex) = read(),
             let (secondHex, _) = read(),
             let (thirdHex, _) = read(),

@@ -21,6 +21,48 @@ class StringParserTests: XCTestCase {
         XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\\\"""# .utf8)))
         XCTAssertEqual(result, .string(#"\""#))
     }
+    
+    func testEscapedLineFeed() {
+        var result: JSONValue?
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\n""# .utf8)))
+        XCTAssertEqual(result, .string("\u{0A}"))
+    }
+    
+    func testDoubleEscapedLineFeed() {
+        var result: JSONValue?
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\\n""# .utf8)))
+        XCTAssertEqual(result, .string(#"\n"#)) // backslash + n
+    }
+    
+    func testEscapedNewCarriageReturn() {
+        var result: JSONValue?
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\r""# .utf8)))
+        XCTAssertEqual(result, .string("\u{0D}")) // carriage return
+    }
+    
+    func testDoubleEscapedNewCarriageReturn() {
+        var result: JSONValue?
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\\r""# .utf8)))
+        XCTAssertEqual(result, .string(#"\r"#)) // backslash + r
+    }
+    
+    func testEscapedBackspace() {
+        var result: JSONValue?
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\b""# .utf8)))
+        XCTAssertEqual(result, .string("\u{08}")) // backspace
+    }
+    
+    func testEscapedTab() {
+        var result: JSONValue?
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\t""# .utf8)))
+        XCTAssertEqual(result, .string("\u{09}")) // tab
+    }
+    
+    func testEscapedReverseSolidus() {
+        var result: JSONValue?
+        XCTAssertNoThrow(result = try JSONParser().parse(bytes: [UInt8](#""\\""# .utf8)))
+        XCTAssertEqual(result, .string("\\"))
+    }
 
     func testSimpleEscapedUnicode() {
         var result: JSONValue?
