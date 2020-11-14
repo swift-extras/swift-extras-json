@@ -1,4 +1,4 @@
-@testable import PureSwiftJSON
+@testable import ExtrasJSON
 import XCTest
 
 class JSONSingleValueEncodingContainerTests: XCTestCase {
@@ -19,7 +19,7 @@ class JSONSingleValueEncodingContainerTests: XCTestCase {
 
         let object = Object(name: Name(firstName: "Adam", surname: "Fowler"))
         var json: [UInt8]?
-        XCTAssertNoThrow(json = try PSJSONEncoder().encode(object))
+        XCTAssertNoThrow(json = try XJSONEncoder().encode(object))
 
         var parsed: JSONValue?
         XCTAssertNoThrow(parsed = try JSONParser().parse(bytes: XCTUnwrap(json)))

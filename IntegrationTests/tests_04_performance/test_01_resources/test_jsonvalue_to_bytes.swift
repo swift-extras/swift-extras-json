@@ -1,4 +1,4 @@
-import PureSwiftJSON
+import ExtrasJSON
 
 func run(identifier: String) {
     let sampleString = SampleStructure.sampleJSON

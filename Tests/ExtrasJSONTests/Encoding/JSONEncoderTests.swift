@@ -1,4 +1,4 @@
-@testable import PureSwiftJSON
+@testable import ExtrasJSON
 import XCTest
 
 class JSONEncoderTests: XCTestCase {
@@ -12,7 +12,7 @@ class JSONEncoderTests: XCTestCase {
     func testEncodeHelloWorld() {
         let hello = HelloWorld(hello: "world")
         var result: [UInt8]?
-        XCTAssertNoThrow(result = try PSJSONEncoder().encode(hello))
+        XCTAssertNoThrow(result = try XJSONEncoder().encode(hello))
         var parsed: JSONValue?
         XCTAssertNoThrow(parsed = try JSONParser().parse(bytes: XCTUnwrap(result)))
 
@@ -26,30 +26,30 @@ class JSONEncoderTests: XCTestCase {
 
     func testEncodeTopLevel12() {
         var result: [UInt8]?
-        XCTAssertNoThrow(result = try PSJSONEncoder().encode(12))
+        XCTAssertNoThrow(result = try XJSONEncoder().encode(12))
         XCTAssertEqual(String(bytes: try XCTUnwrap(result), encoding: .utf8), "12")
     }
 
     func testEncodeTopLevelTrue() {
         var result: [UInt8]?
-        XCTAssertNoThrow(result = try PSJSONEncoder().encode(true))
+        XCTAssertNoThrow(result = try XJSONEncoder().encode(true))
         XCTAssertEqual(String(bytes: try XCTUnwrap(result), encoding: .utf8), "true")
     }
 
     func testEncodeTopLevelNull() {
         var result: [UInt8]?
-        XCTAssertNoThrow(result = try PSJSONEncoder().encode(nil as String?))
+        XCTAssertNoThrow(result = try XJSONEncoder().encode(nil as String?))
         XCTAssertEqual(String(bytes: try XCTUnwrap(result), encoding: .utf8), "null")
     }
 
     func testEncodeTopLevelString() {
         var result: [UInt8]?
-        XCTAssertNoThrow(result = try PSJSONEncoder().encode("Hello World"))
+        XCTAssertNoThrow(result = try XJSONEncoder().encode("Hello World"))
         XCTAssertEqual(String(bytes: try XCTUnwrap(result), encoding: .utf8), #""Hello World""#)
     }
 
     func testEncodeDoubleNAN() {
-        XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Double.nan)) { error in
+        XCTAssertThrowsError(_ = try XJSONEncoder().encode(Double.nan)) { error in
             guard case Swift.EncodingError.invalidValue(let value as Double, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
@@ -61,7 +61,7 @@ class JSONEncoderTests: XCTestCase {
     }
 
     func testEncodeDoubleInf() {
-        XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Double.infinity)) { error in
+        XCTAssertThrowsError(_ = try XJSONEncoder().encode(Double.infinity)) { error in
             guard case Swift.EncodingError.invalidValue(let value as Double, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
@@ -73,7 +73,7 @@ class JSONEncoderTests: XCTestCase {
     }
 
     func testEncodeFloatNAN() {
-        XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Float.nan)) { error in
+        XCTAssertThrowsError(_ = try XJSONEncoder().encode(Float.nan)) { error in
             guard case Swift.EncodingError.invalidValue(let value as Float, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
@@ -85,7 +85,7 @@ class JSONEncoderTests: XCTestCase {
     }
 
     func testEncodeFloatInf() {
-        XCTAssertThrowsError(_ = try PSJSONEncoder().encode(Float.infinity)) { error in
+        XCTAssertThrowsError(_ = try XJSONEncoder().encode(Float.infinity)) { error in
             guard case Swift.EncodingError.invalidValue(let value as Float, let context) = error else {
                 XCTFail("Unexpected error: \(error)"); return
             }
@@ -98,7 +98,7 @@ class JSONEncoderTests: XCTestCase {
 
     func testEncodeQuote() {
         var result: [UInt8]?
-        XCTAssertNoThrow(result = try PSJSONEncoder().encode("\""))
+        XCTAssertNoThrow(result = try XJSONEncoder().encode("\""))
         XCTAssertEqual(String(bytes: try XCTUnwrap(result), encoding: String.Encoding.utf8), "\"\\\"\"")
     }
 
@@ -127,7 +127,7 @@ class JSONEncoderTests: XCTestCase {
         let object = Object(sub: SubObject(value: 12))
 
         var result: [UInt8]?
-        XCTAssertNoThrow(result = try PSJSONEncoder().encode(object))
+        XCTAssertNoThrow(result = try XJSONEncoder().encode(object))
         var parsed: JSONValue?
         XCTAssertNoThrow(parsed = try JSONParser().parse(bytes: XCTUnwrap(result)))
         XCTAssertEqual(parsed, .object(["sub": .object(["key": .string("sub"), "value": .number("12")])]))
@@ -139,7 +139,7 @@ class JSONEncoderTests: XCTestCase {
                 XCTAssertEqual(encoder.userInfo as? [CodingUserInfoKey: String], [CodingUserInfoKey(rawValue: "foo")!: "bar"])
             }
         }
-        var encoder = PSJSONEncoder()
+        var encoder = XJSONEncoder()
         encoder.userInfo[CodingUserInfoKey(rawValue: "foo")!] = "bar"
         XCTAssertNoThrow(_ = try encoder.encode(Foo()))
     }
@@ -148,7 +148,7 @@ class JSONEncoderTests: XCTestCase {
         let string = """
         Hello,\n\nHello\n\nHello\n\nHello
         """
-        let encoder = PSJSONEncoder()
+        let encoder = XJSONEncoder()
         var bytes: [UInt8]?
         XCTAssertNoThrow(bytes = try encoder.encode(string))
         var json: String?

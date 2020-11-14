@@ -1,5 +1,5 @@
+import ExtrasJSON
 import Foundation
-import PureSwiftJSON
 #if os(macOS)
 import SwiftyJSON
 #endif
@@ -20,7 +20,7 @@ func timing(name: String, execute: () throws -> Void) rethrows -> TimeInterval {
 
 let sampleString = SampleStructure.sampleJSON
 let sampleBytes = [UInt8](sampleString.utf8)
-let sampleStruct = try PSJSONDecoder().decode([SampleStructure].self, from: sampleBytes)
+let sampleStruct = try XJSONDecoder().decode([SampleStructure].self, from: sampleBytes)
 let sampleJSON = try JSONParser().parse(bytes: sampleBytes)
 
 print("Number of invocations: \(runs)")
@@ -28,7 +28,7 @@ print("Number of invocations: \(runs)")
 print("------------------------------------------")
 print("JSONValue to bytes")
 
-let toBytes = timing(name: "PureSwift                    ") {
+let toBytes = timing(name: "ExtrasJSON                   ") {
     for _ in 1 ... runs {
         var bytes = [UInt8]()
         bytes.reserveCapacity(2000)
@@ -53,10 +53,10 @@ let ikigaEncoding = try timing(name: "Ikiga                        ") {
     }
 }
 
-let pureEncoder = PSJSONEncoder()
-let pureEncoding = try timing(name: "PureSwift                    ") {
+let xjsonEncoder = XJSONEncoder()
+let xjsonEncoding = try timing(name: "ExtrasJSON                   ") {
     for _ in 1 ... runs {
-        _ = try pureEncoder.encode(sampleStruct)
+        _ = try xjsonEncoder.encode(sampleStruct)
     }
 }
 
@@ -65,21 +65,21 @@ print("Reading")
 
 let sampleData = sampleString.data(using: .utf8)!
 
-let reading = timing(name: "PureSwift on [UInt8]         ") {
+let reading = timing(name: "ExtrasJSON on [UInt8]        ") {
     for _ in 1 ... runs {
         var iterator = sampleBytes.makeIterator()
         while let _ = iterator.next() {}
     }
 }
 
-let readingFoundationData = timing(name: "PureSwift on Foundation.Data ") {
+let readingFoundationData = timing(name: "ExtrasJSON on Foundation.Data") {
     for _ in 1 ... runs {
         var iterator = sampleData.makeIterator()
         while let _ = iterator.next() {}
     }
 }
 
-let readingNIOByteBuffer = timing(name: "PureSwift on NIO.ByteBuffer  ") {
+let readingNIOByteBuffer = timing(name: "ExtrasJSON on NIO.ByteBuffer ") {
     for _ in 1 ... runs {
         var buffer = ByteBufferAllocator().buffer(capacity: sampleBytes.count)
         buffer.writeBytes(sampleBytes)
@@ -98,19 +98,19 @@ let foundationParsing = try timing(name: "Foundation on Foundation.Data") {
     }
 }
 
-let pureParsing = try timing(name: "PureSwift on [UInt8]         ") {
+let xjsonParsing = try timing(name: "ExtrasJSON on [UInt8]        ") {
     for _ in 1 ... runs {
         _ = try JSONParser().parse(bytes: sampleBytes)
     }
 }
 
-let pureParsingData = try timing(name: "PureSwift on Foundation.Data ") {
+let xjsonParsingData = try timing(name: "ExtrasJSON on Foundation.Data") {
     for _ in 1 ... runs {
         _ = try JSONParser().parse(bytes: sampleData)
     }
 }
 
-let pureParsingBuffer = try timing(name: "PureSwift on NIO.ByteBuffer  ") {
+let xjsonParsingBuffer = try timing(name: "ExtrasJSON on NIO.ByteBuffer ") {
     for _ in 1 ... runs {
         var buffer = ByteBufferAllocator().buffer(capacity: sampleBytes.count)
         buffer.writeBytes(sampleBytes)
@@ -166,24 +166,24 @@ let ikigaDecodingBuffer = try timing(name: "IkigaJSON on NIO.ByteBuffer  ") {
     }
 }
 
-let pureDecoder = PSJSONDecoder()
-let pureDecoding = try timing(name: "PureSwift on [UInt8]         ") {
+let xjsonDecoder = XJSONDecoder()
+let xjsonDecoding = try timing(name: "ExtrasJSON on [UInt8]        ") {
     for _ in 1 ... runs {
-        _ = try pureDecoder.decode([SampleStructure].self, from: sampleBytes)
+        _ = try xjsonDecoder.decode([SampleStructure].self, from: sampleBytes)
     }
 }
 
-let pureDecodingOnData = try timing(name: "PureSwift on Foundation.Data ") {
+let xjsonDecodingOnData = try timing(name: "ExtrasJSON on Foundation.Data") {
     for _ in 1 ... runs {
-        _ = try pureDecoder.decode([SampleStructure].self, from: sampleData)
+        _ = try xjsonDecoder.decode([SampleStructure].self, from: sampleData)
     }
 }
 
-let pureDecodingOnByteBuffer = try timing(name: "PureSwift on NIO.ByteBuffer  ") {
+let xjsonDecodingOnByteBuffer = try timing(name: "ExtrasJSON on NIO.ByteBuffer ") {
     for _ in 1 ... runs {
         var buffer = ByteBufferAllocator().buffer(capacity: sampleBytes.count)
         buffer.writeBytes(sampleBytes)
-        _ = try pureDecoder.decode(
+        _ = try xjsonDecoder.decode(
             [SampleStructure].self,
             from: buffer.readBytes(length: buffer.readableBytes)!
         )

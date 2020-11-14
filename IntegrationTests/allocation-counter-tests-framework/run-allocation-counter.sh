@@ -259,7 +259,7 @@ for f in "${files[@]}"; do
     test -f "$f" || die "file '$f' not a file"
 done
 
-working_dir=$(mktemp -d "$tmp_dir/.pure-swift-json-alloc-counter-tests-XXXXXX")
+working_dir=$(mktemp -d "$tmp_dir/.swift-extras-json-alloc-counter-tests-XXXXXX")
 
 selected_hooked_functions="HookedFunctionsDoHook"
 selected_bootstrap="bootstrapDoHook"

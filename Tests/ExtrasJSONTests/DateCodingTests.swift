@@ -1,4 +1,4 @@
-@testable import PureSwiftJSON
+@testable import ExtrasJSON
 import XCTest
 
 class DateCodingTests: XCTestCase {
@@ -46,7 +46,7 @@ class DateCodingTests: XCTestCase {
         do {
             let dateString = "2020-03-18T13:11:10.000Z"
             let json = #"{"eventTime": "\#(dateString)"}"#
-            let result = try PSJSONDecoder().decode(MyEvent.self, from: [UInt8](json.utf8))
+            let result = try XJSONDecoder().decode(MyEvent.self, from: [UInt8](json.utf8))
 
             let components = DateComponents(
                 calendar: Calendar(identifier: .gregorian), timeZone: TimeZone(secondsFromGMT: 0),
@@ -69,7 +69,7 @@ class DateCodingTests: XCTestCase {
             )
 
             let event = MyEvent(eventTime: components.date!)
-            let bytes = try PSJSONEncoder().encode(event)
+            let bytes = try XJSONEncoder().encode(event)
             XCTAssertEqual(String(decoding: bytes, as: Unicode.UTF8.self), json)
         } catch {
             XCTFail("Unexpected error: \(error)")
