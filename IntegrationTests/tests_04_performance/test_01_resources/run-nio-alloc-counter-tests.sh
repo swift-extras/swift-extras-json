@@ -39,7 +39,7 @@ fi
 
 "$here/../../allocation-counter-tests-framework/run-allocation-counter.sh" \
     -p "$here/../../.." \
-    -m PureSwiftJSON \
+    -m ExtrasJSON \
     -s "$here/shared.swift" \
     -t "$tmp_dir" \
     "${tests_to_run[@]}"

@@ -1,13 +1,13 @@
-# pure-swift-json
+# swift-extras-json
 
 [![Swift 5.1](https://img.shields.io/badge/Swift-5.1-blue.svg)](https://swift.org/download/)
-[![github-actions](https://github.com/fabianfett/pure-swift-json/workflows/CI/badge.svg)](https://github.com/fabianfett/pure-swift-json/actions)
-[![codecov](https://codecov.io/gh/fabianfett/pure-swift-json/branch/main/graph/badge.svg)](https://codecov.io/gh/fabianfett/pure-swift-json)
+[![github-actions](https://github.com/swift-extras/swift-extras-json/workflows/CI/badge.svg)](https://github.com/swift-extras/swift-extras-json/actions)
+[![codecov](https://codecov.io/gh/swift-extras/swift-extras-json/branch/main/graph/badge.svg)](https://codecov.io/gh/swift-extras/swift-extras-json)
 
-This package provides a json encoder and decoder in pure Swift (without the use of Foundation or any other dependency). 
+This package provides a json encoder and decoder in Swift (without the use of Foundation or any other dependency). 
 The implementation is [RFC8259](https://tools.ietf.org/html/rfc8259) compliant. It offers a significant performance improvement compared to the Foundation implementation on Linux.
 
-If you like the idea of using pure Swift without any dependencies, you might also like my reimplementation of Base64 in pure Swift: [`swift-base64-kit`](https://github.com/fabianfett/swift-base64-kit)
+If you like the idea of using Swift without any dependencies, you might also like our reimplementation of Base64 in Swift: [`swift-extras-base64`](https://github.com/swift-extras/swift-extras-base64)
 
 ## Goals
 
@@ -29,20 +29,20 @@ If you like the idea of using pure Swift without any dependencies, you might als
 
 ## Usage
 
-Add `pure-swift-json` as dependency to your `Package.swift`:
+Add `swift-extras-json` as dependency to your `Package.swift`:
 
 ```swift
   dependencies: [
-    .package(url: "https://github.com/fabianfett/pure-swift-json.git", .upToNextMajor(from: "0.2.1")),
+    .package(url: "https://github.com/swift-extras/swift-extras-json.git", .upToNextMajor(from: "0.6.0")),
   ],
 ```
 
-Add `PureSwiftJSON` to the target you want to use it in.
+Add `ExtrasJSON` to the target you want to use it in.
 
 ```swift
   targets: [
     .target(name: "MyFancyTarget", dependencies: [
-      .product(name: "PureSwiftJSON", package: "pure-swift-json"),
+      .product(name: "ExtrasJSON", package: "swift-extras-json"),
     ])
   ]
 ```
@@ -50,10 +50,10 @@ Add `PureSwiftJSON` to the target you want to use it in.
 Use it as you would use the Foundation encoder and decoder.
 
 ```swift
-import PureSwiftJSON
+import ExtrasJSON
 
-let bytesArray  = try PSJSONEncoder().encode(myEncodable)
-let myDecodable = try PSJSONDecoder().decode(MyDecodable.self, from: bytes)
+let bytesArray  = try XJSONEncoder().encode(myEncodable)
+let myDecodable = try XJSONDecoder().decode(MyDecodable.self, from: bytes)
 ```
 
 ### Use with SwiftNIO ByteBuffer
@@ -61,13 +61,13 @@ let myDecodable = try PSJSONDecoder().decode(MyDecodable.self, from: bytes)
 For maximal performance create an `[UInt8]` from your `ByteBuffer`, even though `buffer.readableBytesView` would technically work as well.
 
 ```swift
-let result = try pureDecoder.decode(
+let result = try XJSONDecoder().decode(
   [SampleStructure].self,
   from: buffer.readBytes(length: buffer.readableBytes)!)
 ```
 
 ```swift
-let bytes = try pureEncoder.encode(encodable)
+let bytes = try XJSONEncoder().encode(encodable)
 var buffer = byteBufferAllocator.buffer(capacity: bytes.count)
 buffer.writeBytes(bytes)
 ```
@@ -75,13 +75,13 @@ buffer.writeBytes(bytes)
 
 ### Use with Vapor 4
 
-Increase the performance of your Vapor 4 API by using `pure-swift-json` instead of the default Foundation implementation. First you'll need to implement the conformance to Vapor's `ContentEncoder` and `ContentDecoder` as described in the [Vapor docs](https://docs.vapor.codes/4.0/content/#custom-coders).
+Increase the performance of your Vapor 4 API by using `swift-extras-json` instead of the default Foundation implementation. First you'll need to implement the conformance to Vapor's `ContentEncoder` and `ContentDecoder` as described in the [Vapor docs](https://docs.vapor.codes/4.0/content/#custom-coders).
 
 ```swift
 import Vapor
-import PureSwiftJSON
+import ExtrasJSON
 
-extension PSJSONEncoder: ContentEncoder {
+extension XJSONEncoder: ContentEncoder {
   public func encode<E: Encodable>(
     _ encodable: E,
     to body: inout ByteBuffer,
@@ -94,7 +94,7 @@ extension PSJSONEncoder: ContentEncoder {
   }
 }
 
-extension PSJSONDecoder: ContentDecoder {
+extension XJSONDecoder: ContentDecoder {
   public func decode<D: Decodable>(
     _ decodable: D.Type,
     from body: ByteBuffer,
@@ -112,10 +112,10 @@ extension PSJSONDecoder: ContentDecoder {
 Next, register the encoder and decoder for use in Vapor:
 
 ```swift
-let decoder = PSJSONDecoder()
+let decoder = XJSONDecoder()
 ContentConfiguration.global.use(decoder: decoder, for: .json)
 
-let encoder = PSJSONEncoder()
+let encoder = XJSONEncoder()
 ContentConfiguration.global.use(encoder: encoder, for: .json)
 ```
 
@@ -138,7 +138,7 @@ $ swift run -c release
 |  | macOS Swift 5.1 | macOS Swift 5.2 | Linux Swift 5.1 | Linux Swift 5.2 |
 |:--|:--|:--|:--|:--|
 | Foundation   | 2.61s | 2.62s | 13.03s | 12.52s |
-| PureSwiftJSON | 1.23s | 1.25s | 1.13s | 1.05s |
+| ExtrasJSON | 1.23s | 1.25s | 1.13s | 1.05s |
 | Speedup | ~2x | ~2x | **~10x** | **~10x** |
 
 
@@ -147,7 +147,7 @@ $ swift run -c release
 |  | macOS Swift 5.1 | macOS Swift 5.2 | Linux Swift 5.1 | Linux Swift 5.2 |
 |:--|:--|:--|:--|:--|
 | Foundation   | 2.72s | 3.04s | 10.27s | 10.65s |
-| PureSwiftJSON | 1.70s | 1.72s | 1.39s | 1.16s |
+| ExtrasJSON | 1.70s | 1.72s | 1.39s | 1.16s |
 | Speedup | ~1.5x | ~1.5x | **~7x** | **~8x** |
 
 ## Workarounds
@@ -242,7 +242,7 @@ struct MyEvent: Decodable {
 }
 ```
 
-Checkout a full example in the test file [DateCodingTests](https://github.com/fabianfett/pure-swift-json/blob/main/Tests/PureSwiftJSONTests/DateCodingTests.swift).
+Checkout a full example in the test file [DateCodingTests](https://github.com/swift-extras/swift-extras-json/blob/main/Tests/ExtrasJSONTests/DateCodingTests.swift).
 
 ### UTF-16 and UTF-32
 
@@ -260,7 +260,7 @@ let utf8  = Array(String(decoding: utf32, as: Unicode.UTF32.self).utf8)
 
 ## Contributing
 
-Please feel welcome and encouraged to contribute to `pure-swift-json`. This is a very young endeavour and help is always welcome.
+Please feel welcome and encouraged to contribute to `swift-extras-json`. This is a very young endeavour and help is always welcome.
 
 If you've found a bug, have a suggestion, or need help getting started, please open an Issue or a PR. If you use this package, I'd be grateful for sharing your experience.
 

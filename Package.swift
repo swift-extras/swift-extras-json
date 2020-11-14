@@ -4,17 +4,17 @@
 import PackageDescription
 
 var package = Package(
-    name: "pure-swift-json",
+    name: "swift-extras-json",
     products: [
-        .library(name: "PureSwiftJSON", targets: ["PureSwiftJSON"]),
+        .library(name: "ExtrasJSON", targets: ["ExtrasJSON"]),
     ],
     targets: [
-        .target(name: "PureSwiftJSON"),
-        .testTarget(name: "PureSwiftJSONTests", dependencies: [
-            .byName(name: "PureSwiftJSON"),
+        .target(name: "ExtrasJSON"),
+        .testTarget(name: "ExtrasJSONTests", dependencies: [
+            .byName(name: "ExtrasJSON"),
         ]),
         .testTarget(name: "LearningTests", dependencies: [
-            .byName(name: "PureSwiftJSON"),
+            .byName(name: "ExtrasJSON"),
         ]),
     ]
 )

@@ -4,7 +4,7 @@
 import PackageDescription
 
 var package = Package(
-    name: "pure-swift-json-performance",
+    name: "swift-extras-json-performance",
     products: [
         .executable(name: "CodingPerfTests", targets: ["CodingPerfTests"]),
     ],
@@ -17,7 +17,7 @@ var package = Package(
         .target(
             name: "CodingPerfTests",
             dependencies: [
-                .product(name: "PureSwiftJSON", package: "pure-swift-json"),
+                .product(name: "ExtrasJSON", package: "swift-extras-json"),
                 .product(name: "NIO", package: "swift-nio"),
                 .product(name: "NIOFoundationCompat", package: "swift-nio"),
                 .product(name: "IkigaJSON", package: "IkigaJSON"),

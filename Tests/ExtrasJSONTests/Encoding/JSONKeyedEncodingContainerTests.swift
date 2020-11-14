@@ -1,4 +1,4 @@
-@testable import PureSwiftJSON
+@testable import ExtrasJSON
 import XCTest
 
 class JSONKeyedEncodingContainerTests: XCTestCase {
@@ -10,7 +10,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeDoubleNAN() {
         do {
-            let result = try PSJSONEncoder().encode(DoubleBox(number: .nan))
+            let result = try XJSONEncoder().encode(DoubleBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
         } catch Swift.EncodingError.invalidValue(let value as Double, let context) {
             XCTAssert(value.isNaN) // expected
@@ -24,7 +24,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeDoubleInf() {
         do {
-            let result = try PSJSONEncoder().encode(DoubleBox(number: .infinity))
+            let result = try XJSONEncoder().encode(DoubleBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
         } catch Swift.EncodingError.invalidValue(let value as Double, let context) {
             XCTAssert(value.isInfinite) // expected
@@ -43,7 +43,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeFloatNAN() {
         do {
-            let result = try PSJSONEncoder().encode(FloatBox(number: .nan))
+            let result = try XJSONEncoder().encode(FloatBox(number: .nan))
             XCTFail("Did not expect to have a result: \(result)")
         } catch Swift.EncodingError.invalidValue(let value as Float, let context) {
             XCTAssert(value.isNaN) // expected
@@ -57,7 +57,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
 
     func testEncodeFloatInf() {
         do {
-            let result = try PSJSONEncoder().encode(FloatBox(number: .infinity))
+            let result = try XJSONEncoder().encode(FloatBox(number: .infinity))
             XCTFail("Did not expect to have a result: \(result)")
         } catch Swift.EncodingError.invalidValue(let value as Float, let context) {
             XCTAssert(value.isInfinite) // expected
@@ -98,7 +98,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
 
         do {
             let object = Object(firstName: "Adam", surname: "Fowler")
-            let json = try PSJSONEncoder().encode(object)
+            let json = try XJSONEncoder().encode(object)
 
             let parsed = try JSONParser().parse(bytes: json)
             XCTAssertEqual(parsed, .object(["name": .object(["firstName": .string("Adam"), "surname": .string("Fowler")])]))
@@ -127,7 +127,7 @@ class JSONKeyedEncodingContainerTests: XCTestCase {
 
         do {
             let object = NumberStruct()
-            let json = try PSJSONEncoder().encode(object)
+            let json = try XJSONEncoder().encode(object)
 
             let parsed = try JSONParser().parse(bytes: json)
             XCTAssertEqual(parsed, .object(["numbers": .array([.number("1"), .number("2"), .number("3"), .number("4")])]))
