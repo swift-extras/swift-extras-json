@@ -144,11 +144,11 @@ extension JSONValue {
 }
 
 /// Value Getters
-extension JSONValue {
+public extension JSONValue {
     /// If this `JSONValue` is a `.number` that can be losslessly represented as a `Double`, return it as a `Double`.
     /// Otherwise, return nil.
-    public var doubleValue: Double? {
-        guard case let .number(n) = self else {
+    var doubleValue: Double? {
+        guard case .number(let n) = self else {
             return nil
         }
         return Double(n)
@@ -156,40 +156,40 @@ extension JSONValue {
 
     /// If this `JSONValue` is a `.number` that can be losslessly represented as an `Int`, return it as a `Int`.
     /// Otherwise, return nil.
-    public var intValue: Int? {
-        guard case let.number(n) = self else {
+    var intValue: Int? {
+        guard case .number(let n) = self else {
             return nil
         }
         return Int(n)
     }
 
     /// If this `JSONValue` is a `.string`, return it as a `String`. Otherwise, return nil.
-    public var stringValue: String? {
-        guard case let .string(s) = self else {
+    var stringValue: String? {
+        guard case .string(let s) = self else {
             return nil
         }
         return s
     }
 
     /// If this `JSONValue` is a `.bool`, return it as a `Bool`. Otherwise, return nil.
-    public var boolValue: Bool? {
-        guard case let .bool(b) = self else {
+    var boolValue: Bool? {
+        guard case .bool(let b) = self else {
             return nil
         }
         return b
     }
 
     /// If this `JSONValue` is a `.array`, return it as a `[JSONValue]`. Otherwise, return nil.
-    public var arrayValue: [JSONValue]? {
-        guard case let .array(a) = self else {
+    var arrayValue: [JSONValue]? {
+        guard case .array(let a) = self else {
             return nil
         }
         return a
     }
 
     /// If this `JSONValue` is a `.object`, return it as a `[String: JSONValue]`. Otherwise, return nil.
-    public var objectValue: [String: JSONValue]? {
-        guard case let .object(o) = self else {
+    var objectValue: [String: JSONValue]? {
+        guard case .object(let o) = self else {
             return nil
         }
         return o
@@ -311,7 +311,7 @@ extension JSONValue: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
-        case let .number(n):
+        case .number(let n):
             if let int = self.intValue {
                 try container.encode(int)
             } else if let double = self.doubleValue {
@@ -325,13 +325,13 @@ extension JSONValue: Codable {
                     )
                 )
             }
-        case let .string(s):
+        case .string(let s):
             try container.encode(s)
-        case let .bool(b):
+        case .bool(let b):
             try container.encode(b)
-        case let .array(a):
+        case .array(let a):
             try container.encode(a)
-        case let .object(o):
+        case .object(let o):
             try container.encode(o)
         case .null:
             try container.encodeNil()

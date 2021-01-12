@@ -1,5 +1,5 @@
-import XCTest
 import ExtrasJSON
+import XCTest
 
 class JSONValueDecodingTests: XCTestCase {
     let encoder = XJSONEncoder()
