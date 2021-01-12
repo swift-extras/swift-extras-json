@@ -143,6 +143,59 @@ extension JSONValue {
     }
 }
 
+/// Value Getters
+public extension JSONValue {
+    /// If this `JSONValue` is a `.number` that can be losslessly represented as a `Double`, return it as a `Double`.
+    /// Otherwise, return nil.
+    var doubleValue: Double? {
+        guard case .number(let n) = self else {
+            return nil
+        }
+        return Double(n)
+    }
+
+    /// If this `JSONValue` is a `.number` that can be losslessly represented as an `Int`, return it as a `Int`.
+    /// Otherwise, return nil.
+    var intValue: Int? {
+        guard case .number(let n) = self else {
+            return nil
+        }
+        return Int(n)
+    }
+
+    /// If this `JSONValue` is a `.string`, return it as a `String`. Otherwise, return nil.
+    var stringValue: String? {
+        guard case .string(let s) = self else {
+            return nil
+        }
+        return s
+    }
+
+    /// If this `JSONValue` is a `.bool`, return it as a `Bool`. Otherwise, return nil.
+    var boolValue: Bool? {
+        guard case .bool(let b) = self else {
+            return nil
+        }
+        return b
+    }
+
+    /// If this `JSONValue` is a `.array`, return it as a `[JSONValue]`. Otherwise, return nil.
+    var arrayValue: [JSONValue]? {
+        guard case .array(let a) = self else {
+            return nil
+        }
+        return a
+    }
+
+    /// If this `JSONValue` is a `.object`, return it as a `[String: JSONValue]`. Otherwise, return nil.
+    var objectValue: [String: JSONValue]? {
+        guard case .object(let o) = self else {
+            return nil
+        }
+        return o
+    }
+}
+
 extension JSONValue {
     var debugDataTypeDescription: String {
         switch self {
@@ -215,5 +268,98 @@ public func == (lhs: JSONValue, rhs: JSONValue) -> Bool {
         return true
     default:
         return false
+    }
+}
+
+extension JSONValue: ExpressibleByFloatLiteral {
+    public init(floatLiteral value: Double) {
+        self = .number(String(value))
+    }
+}
+
+extension JSONValue: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self = .number(String(value))
+    }
+}
+
+extension JSONValue: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .string(value)
+    }
+}
+
+extension JSONValue: ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: Bool) {
+        self = .bool(value)
+    }
+}
+
+extension JSONValue: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: JSONValue...) {
+        self = .array(elements)
+    }
+}
+
+extension JSONValue: ExpressibleByDictionaryLiteral {
+    public init(dictionaryLiteral elements: (String, JSONValue)...) {
+        self = .object(Dictionary(uniqueKeysWithValues: elements))
+    }
+}
+
+extension JSONValue: Codable {
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .number(let n):
+            if let int = self.intValue {
+                try container.encode(int)
+            } else if let double = self.doubleValue {
+                try container.encode(double)
+            } else {
+                throw EncodingError.invalidValue(
+                    self,
+                    EncodingError.Context(
+                        codingPath: container.codingPath,
+                        debugDescription: "Could not encode \"\(n)\" as a number"
+                    )
+                )
+            }
+        case .string(let s):
+            try container.encode(s)
+        case .bool(let b):
+            try container.encode(b)
+        case .array(let a):
+            try container.encode(a)
+        case .object(let o):
+            try container.encode(o)
+        case .null:
+            try container.encodeNil()
+        }
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let int = try? container.decode(Int.self) {
+            self = .number(String(int))
+        } else if let double = try? container.decode(Double.self) {
+            self = .number(String(double))
+        } else if let string = try? container.decode(String.self) {
+            self = .string(string)
+        } else if let bool = try? container.decode(Bool.self) {
+            self = .bool(bool)
+        } else if let object = try? container.decode([String: JSONValue].self) {
+            self = .object(object)
+        } else if let array = try? container.decode([JSONValue].self) {
+            self = .array(array)
+        } else {
+            throw DecodingError.typeMismatch(
+                JSONValue.self,
+                DecodingError.Context(
+                    codingPath: container.codingPath,
+                    debugDescription: "No valid JSON type could be decoded from the provided input."
+                )
+            )
+        }
     }
 }
